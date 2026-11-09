@@ -457,7 +457,7 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
       <link>${siteUrl}</link>
       <guid isPermaLink="false">radiocast-${ep.id || index}</guid>
       <pubDate>${epDate}</pubDate>
-      <enclosure url="${audioUrl}" length="5242880" type="audio/mpeg" />
+      <enclosure url="${audioUrl}" length="${ep.audioLength || 0}" type="audio/mpeg" />
       <itunes:title><![CDATA[${ep.title || 'اپیزود پادکست'}]]></itunes:title>
       <itunes:author><![CDATA[${channel.author}]]></itunes:author>
       <itunes:summary><![CDATA[${ep.episodeSummary || ''}]]></itunes:summary>
