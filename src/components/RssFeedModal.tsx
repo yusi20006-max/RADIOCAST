@@ -127,7 +127,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
 
         {/* Modal Header */}
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Rss className="w-6 h-6 text-amber-400" />
             <h3 className="text-xl font-black text-white">
               ساخت و دریافت فایل فید RSS
