@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-black bg-gradient-to-r from-purple-200 via-white to-pink-200 bg-clip-text text-transparent">
                 رادیو کست
               </h1>
