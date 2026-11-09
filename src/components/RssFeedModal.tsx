@@ -5,7 +5,6 @@ import {
   Copy,
   Check,
   Download,
-  ExternalLink,
   RefreshCw,
   Globe,
   Radio,
@@ -41,14 +40,11 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
   onToast,
 }) => {
   const [channel, setChannel] = useState<PodcastChannelInfo>(DEFAULT_CHANNEL);
-  const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedXml, setCopiedXml] = useState(false);
   const [xmlContent, setXmlContent] = useState<string>('');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [activeGuideTab, setActiveGuideTab] = useState<'castbox' | 'apple' | 'spotify' | 'shenoto'>('castbox');
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const feedUrl = `${origin}/api/podcast/rss.xml`;
 
   // Fetch or generate XML on mount or changes
   useEffect(() => {
@@ -78,31 +74,13 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
   const handleSyncFeed = async () => {
     try {
       setIsSyncing(true);
-      const res = await fetch('/api/podcast/update-feed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          channel,
-          episodes: savedEpisodes,
-        }),
-      });
-      if (res.ok) {
-        onToast('اطلاعات فید در حافظه موقت سرور ثبت شد؛ فقط اپیزودهای دارای audioUrl عمومی در XML قرار می‌گیرند.');
-        loadGeneratedXml();
-      }
-    } catch (e) {
-      console.error(e);
+      await loadGeneratedXml();
+      onToast('پیش‌نویس XML با اطلاعات فعلی بازسازی شد؛ این کار فید عمومی میزبانی نمی‌کند.');
     } finally {
       setIsSyncing(false);
     }
   };
 
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(feedUrl);
-    setCopiedUrl(true);
-    onToast('نشانی endpoint فید کپی شد؛ پیش از انتشار، وجود فایل‌های صوتی عمومی را بررسی کنید.');
-    setTimeout(() => setCopiedUrl(false), 2500);
-  };
 
   const handleCopyXml = () => {
     navigator.clipboard.writeText(xmlContent);
@@ -149,53 +127,24 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
           </p>
         </div>
 
-        {/* Live RSS Feed URL Banner */}
-        <div className="bg-gradient-to-r from-amber-950/30 via-slate-950 to-purple-950/30 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-3 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-              <h4 className="text-xs sm:text-sm font-bold text-white">نشانی endpoint موقت و مشترک RSS:</h4>
-            </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold font-mono">
-              RSS 2.0 + iTunes Tags
-            </span>
+        {/* RSS hosting status */}
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4 sm:p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 text-amber-400 shrink-0" />
+            <h4 className="text-sm font-bold text-white">وضعیت انتشار عمومی</h4>
           </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <input
-              type="text"
-              readOnly
-              value={feedUrl}
-              className="flex-1 bg-slate-950/90 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-amber-200 font-mono outline-none"
-              dir="ltr"
-            />
-            <button
-              onClick={handleCopyUrl}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
-            >
-              {copiedUrl ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              <span>{copiedUrl ? 'کپی شد!' : 'کپی آدرس فید'}</span>
-            </button>
-            <a
-              href={feedUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center justify-center shrink-0 transition-all"
-              title="مشاهده مستقیم خروجی XML"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 pt-1">
-            <span>اپیزودهای انتخاب‌شده: {savedEpisodes.length}؛ فقط موارد دارای audioUrl عمومی وارد XML می‌شوند.</span>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            این نسخه فقط فایل XML پیش‌نویس می‌سازد و دانلود می‌کند؛ فید عمومی پایدار یا فضای میزبانی فایل صوتی ندارد. برای انتشار در پادگیرها باید فایل‌های صوتی را روی میزبان عمومی قرار دهید و نشانی مستقیم آن‌ها را به اپیزودها اضافه کنید.
+          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+            <span>اپیزودهای انتخاب‌شده برای پیش‌نویس: {savedEpisodes.length}</span>
             <button
               onClick={handleSyncFeed}
               disabled={isSyncing}
-              className="text-amber-400 hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer"
+              className="text-amber-400 hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer disabled:opacity-50"
             >
-              {isSyncing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-              <span>همگام‌سازی مجدد اپیزودها با فید روی سرور</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>بازسازی پیش‌نویس XML</span>
             </button>
           </div>
         </div>
