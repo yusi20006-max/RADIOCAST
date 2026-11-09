@@ -384,7 +384,7 @@ export default function App() {
       showToast('پادکست شما آماده پخش و دانلود شد!');
 
       // Start playback automatically
-      startAudioPlayback(masterBuf, 0, playbackRate);
+      startAudioPlayback(masterBuf, 0, playbackRate, updatedEpisode);
     } catch (err: any) {
       console.error('Synthesize & Mix error:', err);
       alert('خطا در تولید صدای گویندگان یا میکس پادکست: ' + (err.message || 'لطفاً دوباره تلاش کنید.'));
@@ -394,7 +394,7 @@ export default function App() {
   };
 
   // Audio Playback Controls
-  const startAudioPlayback = (buffer: AudioBuffer, offset: number, rate: number = 1.0) => {
+  const startAudioPlayback = (buffer: AudioBuffer, offset: number, rate: number = 1.0, episodeForPlayback: PodcastEpisode | null = currentEpisode) => {
     const ctx = getAudioContext();
     if (audioSourceRef.current) {
       try {
@@ -432,10 +432,10 @@ export default function App() {
           setCurrentTime(cur);
 
           // Calculate which turn is active
-          if (currentEpisode && currentEpisode.script.length > 0) {
-            const avgTurnTime = buffer.duration / currentEpisode.script.length;
+          if (episodeForPlayback && episodeForPlayback.script.length > 0) {
+            const avgTurnTime = buffer.duration / episodeForPlayback.script.length;
             const turnIdx = Math.min(
-              currentEpisode.script.length - 1,
+              episodeForPlayback.script.length - 1,
               Math.max(0, Math.floor(cur / avgTurnTime))
             );
             setActiveTurnIndex(turnIdx);
