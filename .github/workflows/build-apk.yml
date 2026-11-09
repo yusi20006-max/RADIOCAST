@@ -19,13 +19,22 @@ jobs:
         node-version: 20
         cache: 'npm'
 
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Install dependencies
       run: npm install --legacy-peer-deps
 
     - name: Build Web App
       run: node node_modules/.bin/vite build
 
-    - name: Install Capacitor CLI & Core
+    - name: Install Capacitor CLI & Core & Android
       run: npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
 
     - name: Create Capacitor Config
@@ -39,23 +48,17 @@ jobs:
         }
         EOF
 
-    - name: Add Android Platform
-      run: npx cap add android
-
-    - name: Update Capacitor Android Assets
-      run: npx cap sync android
-
-    - name: Set up JDK for Android
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+    - name: Add Android Platform & Sync
+      run: |
+        npx cap telemetry off || true
+        npx cap add android --no-interactive || true
+        npx cap sync android
 
     - name: Build Android APK
       working-directory: ./android
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
