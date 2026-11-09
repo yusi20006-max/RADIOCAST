@@ -145,9 +145,9 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
   const isHost1 = activeTurn?.speaker === 'host1';
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-28">
+    <div className="w-full min-w-0 max-w-5xl mx-auto space-y-6 pb-28">
       {/* Top action row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={onBackToEditor}
           className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl transition-all"
@@ -160,7 +160,7 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
           <button
             onClick={onOpenCoverModal}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 border border-purple-500/30 hover:border-purple-400 text-purple-300 hover:text-white transition-all cursor-pointer"
-            title="طراحی و دانلود کاور آرت ۳۰۰۰×۳۰۰۰"
+            title="طراحی و دانلود کاور آرت ۱۴۰۰×۱۴۰۰"
           >
             <Palette className="w-4 h-4 text-purple-400" />
             <span>کاور آرت</span>
@@ -276,7 +276,7 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
       </div>
 
       {/* Floating Audio Controller Bar */}
-      <div className="bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-purple-500/30 p-5 shadow-2xl space-y-4">
+      <div className="bg-slate-900/90 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border border-purple-500/30 p-4 sm:p-5 shadow-2xl space-y-4 min-w-0">
         {/* Progress Bar & Timers */}
         <div className="space-y-1.5">
           <input
@@ -359,7 +359,7 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
 
       {/* Synchronized Transcript View (Karaoke auto-scrolling) */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between px-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Radio className="w-4 h-4 text-purple-400" />
             <span>متن کامل پادکست (همگام با صدای گوینده)</span>
