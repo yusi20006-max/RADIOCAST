@@ -18,7 +18,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'npm'
 
     - name: Set up Java
@@ -33,13 +33,10 @@ jobs:
         packages: platform-tools
 
     - name: Install dependencies
-      run: npm install --legacy-peer-deps
-
-    - name: Install Capacitor packages explicitly
-      run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest --save --legacy-peer-deps
+      run: npm ci --legacy-peer-deps
 
     - name: Build Web App
-      run: node node_modules/.bin/vite build
+      run: npm run build
 
     - name: Create Capacitor Config
       run: |
