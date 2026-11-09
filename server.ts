@@ -142,6 +142,7 @@ app.post('/api/external-provider/health-check', rateLimit(10, 60_000), async (re
     // Test with a lightweight ping to /chat/completions
     const response = await fetch(`${cleanBaseUrl}/chat/completions`, {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey.trim()}`,
@@ -287,6 +288,7 @@ ${sourceText.slice(0, 8000)}
 
         const extResponse = await fetch(`${cleanBaseUrl}/chat/completions`, {
           method: 'POST',
+          redirect: 'error',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${externalConfig.apiKey.trim()}`,
