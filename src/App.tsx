@@ -288,14 +288,14 @@ export default function App() {
   };
 
   // Step 2 & 3: Master Synthesize & Mix Audio
-  const handleSynthesizeAndPlay = async () => {
-    if (!currentEpisode) return;
+  const handleSynthesizeAndPlay = async (episodeToSynthesize: PodcastEpisode | null = episodeToSynthesize) => {
+    if (!episodeToSynthesize) return;
 
     // Stop existing audio
     stopAudioPlayback();
 
     setIsSynthesizingAudio(true);
-    const totalTurns = currentEpisode.script.length;
+    const totalTurns = episodeToSynthesize.script.length;
     setSynthesizingProgress({ current: 0, total: totalTurns, message: 'آغاز پردازش استودیو...' });
 
     const ctx = getAudioContext();
@@ -303,7 +303,7 @@ export default function App() {
 
     try {
       for (let i = 0; i < totalTurns; i++) {
-        const turn = currentEpisode.script[i];
+        const turn = episodeToSynthesize.script[i];
         setSynthesizingProgress({
           current: i + 1,
           total: totalTurns,
@@ -311,50 +311,33 @@ export default function App() {
         });
 
         let base64 = turn.audioBase64;
-        const voice = turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice;
+        const voice = turn.speaker === 'host1' ? episodeToSynthesize.host1Voice : episodeToSynthesize.host2Voice;
 
         if (!base64) {
-          try {
-            const res = await fetch('/api/podcast/synthesize-turn', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                text: turn.text,
-                voiceName: voice,
-                style: turn.speechStyle,
-                speed: currentEpisode.speed,
-                turnTone: turn.turnTone || 'auto',
-              }),
-            });
+          const res = await fetch('/api/podcast/synthesize-turn', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: turn.text,
+              voiceName: voice,
+              style: turn.speechStyle,
+              speed: episodeToSynthesize.speed,
+              turnTone: turn.turnTone || 'auto',
+            }),
+          });
 
-            if (res.ok) {
-              const data = await res.json();
-              base64 = data.audioBase64;
-              turn.audioBase64 = base64;
-            }
-          } catch (turnErr) {
-            console.warn('API TTS failed for turn, generating synthetic placeholder buffer', turnErr);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.error || 'تولید صدای گوینده ناموفق بود؛ کد خطا: ' + res.status);
           }
+          if (!data.audioBase64) {
+            throw new Error('سرویس صوتی برای این بخش فایل صوتی برنگرداند؛ خروجی ناقص ساخته نشد.');
+          }
+          base64 = data.audioBase64;
+          turn.audioBase64 = base64;
         }
 
-        let audioBuf: AudioBuffer;
-        if (base64) {
-          audioBuf = await decodeAudioBase64(base64, ctx);
-        } else {
-          // Synthetic procedural speech proxy buffer based on text length
-          const estimatedDuration = Math.max(2.5, turn.text.length * 0.08);
-          audioBuf = ctx.createBuffer(2, Math.floor(ctx.sampleRate * estimatedDuration), ctx.sampleRate);
-          const ch0 = audioBuf.getChannelData(0);
-          const ch1 = audioBuf.getChannelData(1);
-          const baseFreq = turn.speaker === 'host1' ? 140 : 210;
-          for (let s = 0; s < ch0.length; s++) {
-            const t = s / ctx.sampleRate;
-            const formant = Math.sin(2 * Math.PI * baseFreq * t) * 0.15;
-            const mod = 0.5 + 0.5 * Math.sin(t * 12);
-            ch0[s] = formant * mod;
-            ch1[s] = formant * mod;
-          }
-        }
+        const audioBuf = await decodeAudioBase64(base64, ctx);
 
         voiceBuffers.push({ buffer: audioBuf, sfxCue: turn.sfxCue });
       }
@@ -369,8 +352,8 @@ export default function App() {
       const masterBuf = await mixPodcastAudioBuffer({
         ctx,
         voiceBuffers,
-        bgmStyle: currentEpisode.suggestedBgm,
-        bgmVolume: currentEpisode.bgmVolume,
+        bgmStyle: episodeToSynthesize.suggestedBgm,
+        bgmVolume: episodeToSynthesize.bgmVolume,
         speedMultiplier: playbackRate,
       });
 
@@ -385,7 +368,7 @@ export default function App() {
       setWavBlob(wav);
 
       // Auto save episode with duration
-      const updatedEpisode = { ...currentEpisode, durationSeconds: masterBuf.duration };
+      const updatedEpisode = { ...episodeToSynthesize, durationSeconds: masterBuf.duration };
       setCurrentEpisode(updatedEpisode);
       saveEpisodeToStorage(updatedEpisode);
 
@@ -528,7 +511,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white" dir="rtl">
+    <div className="min-h-screen w-full min-w-0 overflow-x-clip bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white" dir="rtl">
       {/* Studio Header */}
       <Header
         currentTab={currentTab}
@@ -544,7 +527,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="flex-1 w-full min-w-0 px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
         {currentTab === 'library' ? (
           <LibraryView
             savedEpisodes={savedEpisodes}
@@ -552,8 +535,8 @@ export default function App() {
               setCurrentEpisode(ep);
               setStudioStep('player');
               setCurrentTab('studio');
-              // Automatically re-synthesize or load
-              handleSynthesizeAndPlay();
+              // Pass the selected episode directly; React state updates are asynchronous.
+              handleSynthesizeAndPlay(ep);
             }}
             onDeleteEpisode={handleDeleteSavedEpisode}
             onNewPodcast={() => {
@@ -670,7 +653,7 @@ export default function App() {
 
       {/* Feedback Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-purple-600/90 text-white text-xs sm:text-sm font-bold shadow-2xl backdrop-blur-md border border-purple-400/40 animate-bounce">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md text-center break-words px-5 py-2.5 rounded-2xl bg-purple-600/90 text-white text-xs sm:text-sm font-bold shadow-2xl backdrop-blur-md border border-purple-400/40 animate-bounce">
           {toastMessage}
         </div>
       )}
