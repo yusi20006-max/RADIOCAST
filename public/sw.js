@@ -11,9 +11,39 @@ const PRECACHE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS).catch(() => {}))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.all(
+      PRECACHE_ASSETS.map(async (asset) => {
+        try {
+          const response = await fetch(asset);
+          if (response.ok) await cache.put(asset, response);
+        } catch {
+          // A missing optional icon must not prevent the app shell from being cached.
+        }
+      })
+    );
+
+    // Cache the JS and CSS bundles referenced by the production HTML on first install.
+    const htmlResponse = await cache.match('/index.html');
+    if (htmlResponse) {
+      const html = await htmlResponse.text();
+      const assetPaths = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css)(?:\?[^"]*)?)"/g)]
+        .map((match) => match[1])
+        .filter((asset) => asset.startsWith('/'));
+
+      await Promise.all(
+        assetPaths.map(async (asset) => {
+          try {
+            const response = await fetch(asset);
+            if (response.ok) await cache.put(asset, response);
+          } catch {
+            // Static bundles can be cached on their first later successful request.
+          }
+        })
+      );
+    }
+  })());
   self.skipWaiting();
 });
 
