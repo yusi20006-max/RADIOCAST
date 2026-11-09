@@ -96,7 +96,7 @@ RADIOCAST/
 ### مراحل راه‌اندازی:
 1. مخزن را کلون کنید:
    ```bash
-   git clone https://github.com/yousefazimi/RADIOCAST.git
+   git clone https://github.com/yusi20006-max/RADIOCAST.git
    cd RADIOCAST
    ```
 

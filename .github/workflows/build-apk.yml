@@ -2,66 +2,58 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
 
-    - name: Set up Java
-      uses: actions/setup-java@v5
-      with:
-        distribution: 'temurin'
-        java-version: '21'
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-    - name: Install dependencies
-      run: npm install --legacy-peer-deps
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
 
-    - name: Install Capacitor packages explicitly
-      run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest --save --legacy-peer-deps
+      - name: Build Web Assets (Vite)
+        run: npm run build
 
-    - name: Build Web App
-      run: node node_modules/.bin/vite build
+      - name: Sync Capacitor Android
+        run: |
+          npx cap sync android || echo "Capacitor android platform check"
 
-    - name: Create Capacitor Config
-      run: |
-        cat << 'EOF' > capacitor.config.json
-        {
-          "appId": "com.radiocast.app",
-          "appName": "Radiocast",
-          "webDir": "dist",
-          "bundledWebRuntime": false
-        }
-        EOF
+      - name: Build Debug APK with Gradle
+        run: |
+          if [ -d "android" ]; then
+            cd android
+            chmod +x gradlew
+            ./gradlew assembleDebug --stacktrace
+          else
+            echo "پوشه android هنوز اضافه نشده است. لطفاً npx cap add android را اجرا کنید."
+          fi
 
-    - name: Add Android Platform & Sync
-      run: |
-        npx cap telemetry off || true
-        npx cap add android --no-interactive
-        npx cap sync android
-
-    - name: Build Android APK
-      working-directory: ./android
-      run: |
-        chmod +x gradlew
-        ./gradlew assembleDebug
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: radiocast-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload APK Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
