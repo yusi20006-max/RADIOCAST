@@ -538,7 +538,6 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
   const currentYear = new Date().getFullYear();
   const pubDate = new Date().toUTCString();
   const siteUrl = appUrl.replace(/\/+$/, '');
-  const feedUrl = `${siteUrl}/api/podcast/rss.xml`;
 
   let itemsXml = '';
   // A podcast enclosure must point to a real, publicly reachable audio file.
@@ -601,38 +600,25 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
 /**
  * Public RSS Feed endpoint for Apple Podcasts, Spotify, Castbox, etc.
  */
-app.get('/api/podcast/rss.xml', (req, res) => {
-  const host = req.get('host') || 'localhost:3000';
-  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-  const appUrl = process.env.APP_URL || `${protocol}://${host}`;
-
-  const xml = buildRssXml(storedPodcastFeed.channel, storedPodcastFeed.episodes, appUrl);
-  res.set('Content-Type', 'application/xml; charset=utf-8');
-  return res.send(xml);
+app.get('/api/podcast/rss.xml', (_req, res) => {
+  return res.status(501).json({
+    error: 'میزبانی فید عمومی در این نسخه فعال نیست؛ از فایل XML پیش‌نویس استفاده کنید و فایل‌های صوتی را جداگانه میزبانی کنید.',
+  });
 });
 
 /**
  * Update published episodes in the live RSS feed
  */
-app.post('/api/podcast/update-feed', (req, res) => {
-  try {
-    const { channel, episodes } = req.body;
-    if (channel) {
-      storedPodcastFeed.channel = { ...storedPodcastFeed.channel, ...channel };
-    }
-    if (Array.isArray(episodes)) {
-      storedPodcastFeed.episodes = episodes;
-    }
-    return res.json({ success: true, count: storedPodcastFeed.episodes.length });
-  } catch (e: any) {
-    return res.status(500).json({ error: e.message });
-  }
+app.post('/api/podcast/update-feed', (_req, res) => {
+  return res.status(410).json({
+    error: 'ذخیره فید عمومی مشترک و موقت غیرفعال شده است؛ از endpoint ساخت XML برای دریافت پیش‌نویس استفاده کنید.',
+  });
 });
 
 /**
  * Generate standalone RSS XML string for direct download
  */
-app.post('/api/podcast/generate-rss', (req, res) => {
+app.post('/api/podcast/generate-rss', rateLimit(30, 60_000), (req, res) => {
   try {
     const { channel, episodes } = req.body;
     const host = req.get('host') || 'localhost:3000';
