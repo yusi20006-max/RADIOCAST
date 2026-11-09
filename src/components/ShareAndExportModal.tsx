@@ -161,7 +161,7 @@ export const ShareAndExportModal: React.FC<ShareAndExportModalProps> = ({
             <h3 className="text-xl font-black text-white">ذخیره و اشتراک‌گذاری پادکست</h3>
           </div>
           <p className="text-xs text-slate-400">
-            فایل صوتی میکس‌شده را دانلود کرده یا مستقیماً در شبکه‌های اجتماعی منتشر کنید.
+            فایل صوتی میکس‌شده را دانلود کنید یا لینک برنامه و توضیحات آن را در شبکه‌های اجتماعی به اشتراک بگذارید.
           </p>
         </div>
 
