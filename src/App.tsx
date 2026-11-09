@@ -539,9 +539,9 @@ export default function App() {
             savedEpisodes={savedEpisodes}
             onSelectEpisode={(ep) => {
               setCurrentEpisode(ep);
-              setStudioStep('player');
+              setStudioStep('editor');
               setCurrentTab('studio');
-              // Pass the selected episode directly; React state updates are asynchronous.
+              // Render the selected episode directly; React state updates are asynchronous.
               handleSynthesizeAndPlay(ep);
             }}
             onDeleteEpisode={handleDeleteSavedEpisode}
