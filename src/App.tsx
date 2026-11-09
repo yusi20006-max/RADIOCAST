@@ -387,7 +387,7 @@ export default function App() {
       startAudioPlayback(masterBuf, 0, playbackRate);
     } catch (err: any) {
       console.error('Synthesize & Mix error:', err);
-      alert('خطا در میکس پادکست: ' + (err.message || 'لطفاً دوباره تلاش کنید.'));
+      alert('خطا در تولید صدای گویندگان یا میکس پادکست: ' + (err.message || 'لطفاً دوباره تلاش کنید.'));
     } finally {
       setIsSynthesizingAudio(false);
     }
