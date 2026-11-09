@@ -52,7 +52,7 @@ jobs:
     - name: Add Android Platform & Sync
       run: |
         npx cap telemetry off || true
-        npx cap add android --no-interactive
+        npx cap add android
         npx cap sync android
 
     - name: Build Android APK
