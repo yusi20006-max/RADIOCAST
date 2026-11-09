@@ -372,7 +372,7 @@ export const InputStep: React.FC<InputStepProps> = ({
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center justify-between w-full text-slate-300 hover:text-white text-xs font-semibold"
+            className="flex flex-wrap items-center justify-between gap-2 w-full text-slate-300 hover:text-white text-xs font-semibold"
           >
             <span className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-purple-400" />
