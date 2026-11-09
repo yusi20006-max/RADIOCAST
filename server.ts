@@ -200,7 +200,7 @@ app.post('/api/podcast/generate-script', rateLimit(6, 60_000), async (req, res) 
       sourceText,
       format = 'dual', // 'dual' | 'solo' | 'interview' | 'briefing'
       tone = 'friendly', // 'friendly' | 'serious' | 'energetic' | 'dramatic' | 'humorous'
-      speed = 'normal', // 'slow' | 'normal' | 'fast'
+      speed = 'normal', // 'slow' | 'normal' | 'fast' | 'veryFast'
       host1Name = 'نیما',
       host2Name = 'سارا',
       durationTarget = 'medium', // 'short' | 'medium' | 'detailed'
@@ -250,7 +250,7 @@ ${toneDescriptions[tone] || toneDescriptions.friendly}
 تعداد بخش‌ها:
 ${turnCounts[durationTarget] || turnCounts.medium}
 
-سرعت خوانش مدنظر: ${speed === 'slow' ? 'آهسته و آرام' : speed === 'fast' ? 'سریع و ریتمیک' : 'طبیعی و متعادل'}
+سرعت خوانش مدنظر: ${speed === 'slow' ? 'آهسته و آرام' : speed === 'veryFast' ? 'بسیار سریع و ریتمیک با حفظ وضوح' : speed === 'fast' ? 'سریع و ریتمیک' : 'طبیعی و متعادل'}
 
 ${
   dynamicToneEnabled
