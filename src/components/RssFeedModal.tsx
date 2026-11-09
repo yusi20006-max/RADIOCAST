@@ -259,12 +259,12 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
           <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 space-y-2 leading-relaxed">
             {activeGuideTab === 'castbox' && (
               <>
-                <p className="font-bold text-amber-300">نحوه ثبت پادکست در کست‌باکس (محبوب‌ترین پادگیر ایران):</p>
+                <p className="font-bold text-amber-300">مراحل کلی ثبت پادکست در Castbox:</p>
                 <ol className="list-decimal list-inside space-y-1 text-slate-400">
                   <li>وارد سایت <a href="https://castbox.fm" target="_blank" rel="noreferrer" className="text-amber-400 underline">Castbox Creator Studio</a> شوید.</li>
                   <li>روی دکمه «Claim Ownership» یا «Add Show» کلیک کنید.</li>
-                  <li>تا زمانی که فایل صوتی عمومی و پایدار برای اپیزودها تعریف نشده، این فید برای انتشار نهایی آماده نیست.</li>
-                  <li>پس از ثبت و تأیید فید توسط پادگیر، ممکن است نمایش عمومی آن زمان ببرد؛ در حال حاضر این برنامه فایل صوتی را میزبانی نمی‌کند.</li>
+                  <li>ابتدا فید RSS را از یک میزبان پادکست دریافت کنید؛ فایل XML این برنامه به‌تنهایی یک نشانی فید عمومی نیست.</li>
+                  <li>در پنل Castbox نشانی عمومی فید میزبان را وارد کنید و مراحل اعتبارسنجی را دنبال کنید.</li>
                 </ol>
               </>
             )}
@@ -275,7 +275,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
                 <ol className="list-decimal list-inside space-y-1 text-slate-400">
                   <li>با اپل آی‌دی خود وارد پنل <a href="https://podcastsconnect.apple.com" target="_blank" rel="noreferrer" className="text-amber-400 underline">Podcasts Connect</a> شوید.</li>
                   <li>علامت «+» و سپس گزینه «Add Show with an RSS Feed» را بزنید.</li>
-                  <li>لینک فید بالا را وارد کرده و پس از اعتبارسنجی خودکار، روی «Submit» بزنید.</li>
+                  <li>نشانی عمومی RSS را از سرویس میزبانی پادکست خود وارد کنید و مراحل اعتبارسنجی را کامل کنید.</li>
                 </ol>
               </>
             )}
@@ -285,7 +285,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
                 <p className="font-bold text-amber-300">ثبت در Spotify for Podcasters:</p>
                 <ol className="list-decimal list-inside space-y-1 text-slate-400">
                   <li>وارد <a href="https://podcasters.spotify.com" target="_blank" rel="noreferrer" className="text-amber-400 underline">Spotify for Podcasters</a> شوید.</li>
-                  <li>گزینه «I already have a podcast» را انتخاب و آدرس RSS فید بالا را وارد کنید.</li>
+                  <li>گزینه «I already have a podcast» را انتخاب و نشانی عمومی RSS میزبان خود را وارد کنید.</li>
                   <li>کد تایید ارسال‌شده به ایمیل خود را وارد نمایید.</li>
                 </ol>
               </>
@@ -296,7 +296,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
                 <p className="font-bold text-amber-300">ثبت در شنوتو (سرویس پادکست ایرانی):</p>
                 <ol className="list-decimal list-inside space-y-1 text-slate-400">
                   <li>وارد پنل راوی یا تولیدکننده در سایت شنوتو شوید.</li>
-                  <li>از بخش افزودن پادکست، گزینه «همگام‌سازی از طریق فید RSS» را انتخاب کرده و لینک بالا را الصاق کنید.</li>
+                  <li>از بخش افزودن پادکست، گزینهٔ همگام‌سازی از طریق RSS را انتخاب و نشانی عمومی فید میزبان خود را وارد کنید.</li>
                 </ol>
               </>
             )}
