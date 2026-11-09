@@ -262,7 +262,7 @@ export const InputStep: React.FC<InputStepProps> = ({
           <div className="space-y-3 pt-2">
             <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
               <Gauge className="w-4 h-4 text-indigo-400" />
-              <span>سرعت خوانش و پخش صدا (Playback Speed):</span>
+              <span>سرعت پیشنهادی گویندگی (Speech Pace):</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {SPEED_OPTIONS.map((spd) => {
@@ -378,7 +378,7 @@ export const InputStep: React.FC<InputStepProps> = ({
               <Sliders className="w-4 h-4 text-purple-400" />
               تنظیمات پیشرفته گویندگان و مدت‌زمان اپیزود
             </span>
-            <span className="text-purple-400">{showAdvanced ? 'بستن ▲' : 'مشاهده جزییات ▼'}</span>
+            <span className="text-purple-400">{showAdvanced ? 'بستن ▲' : 'مشاهده جزئیات ▼'}</span>
           </button>
 
           {showAdvanced && (
