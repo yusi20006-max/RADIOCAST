@@ -214,7 +214,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   </h5>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  آدرس این برنامه را در مرورگر کروم یا سامسونگ گوشی اندرویدی خود باز کنید. منوی ۳ نقطه مرورگر را باز کرده و گزینه <strong className="text-emerald-300">«افزودن به صفحه اصلی» (Install app / Add to Home screen)</strong> را لمس کنید. برنامه با آیکون اختصاصی و پنجره تمام‌صفحه دقیقاً مانند یک اپلیکیشن بومی روی گوشی شما قرار می‌گیرد.
+                  آدرس این برنامه را در مرورگر کروم یا سامسونگ گوشی اندرویدی خود باز کنید. منوی ۳ نقطه مرورگر را باز کرده و گزینه <strong className="text-emerald-300">«افزودن به صفحه اصلی» (Install app / Add to Home screen)</strong> را لمس کنید. برنامه با آیکون اختصاصی در پنجرهٔ مستقل مرورگر اجرا می‌شود؛ این نسخه همچنان یک وب‌اپلیکیشن است و همهٔ قابلیت‌های یک اپ بومی را ندارد.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
