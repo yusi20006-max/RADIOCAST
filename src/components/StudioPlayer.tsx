@@ -362,10 +362,10 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-2 px-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Radio className="w-4 h-4 text-purple-400" />
-            <span>متن کامل پادکست (همگام با صدای گوینده)</span>
+            <span>متن کامل پادکست (نمایش تقریبی بخش در حال پخش)</span>
           </h3>
           <span className="text-xs text-slate-400">
-            روی هر بخش کلیک کنید تا پخش از آنجا شروع شود
+            زمان‌بندی بخش‌ها تقریبی است؛ برای رفتن به بخش موردنظر روی آن بزنید
           </span>
         </div>
 
