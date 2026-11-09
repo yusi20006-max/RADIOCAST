@@ -153,8 +153,8 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
         <div className="bg-gradient-to-r from-amber-950/30 via-slate-950 to-purple-950/30 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-3 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <h4 className="text-xs sm:text-sm font-bold text-white">نشانی فید RSS روی سرور فعلی:</h4>
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+              <h4 className="text-xs sm:text-sm font-bold text-white">نشانی endpoint موقت و مشترک RSS:</h4>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold font-mono">
               RSS 2.0 + iTunes Tags
@@ -188,7 +188,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 pt-1">
-            <span>تعداد اپیزودهای حاضر در فید: {savedEpisodes.length} قسمت</span>
+            <span>اپیزودهای انتخاب‌شده: {savedEpisodes.length}؛ فقط موارد دارای audioUrl عمومی وارد XML می‌شوند.</span>
             <button
               onClick={handleSyncFeed}
               disabled={isSyncing}
