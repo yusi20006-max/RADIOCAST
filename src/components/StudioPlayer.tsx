@@ -169,7 +169,7 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
           <button
             onClick={onOpenRssModal}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-900 border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-white transition-all cursor-pointer"
-            title="فید RSS پادکست و انتشار در پادگیرها"
+            title="ساخت و دریافت پیش‌نویس فایل RSS"
           >
             <Rss className="w-4 h-4 text-amber-400" />
             <span>فید RSS</span>
