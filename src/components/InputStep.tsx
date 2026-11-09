@@ -158,12 +158,13 @@ export const InputStep: React.FC<InputStepProps> = ({
               onChange={(e) => setSourceText(e.target.value)}
               placeholder="متن، مقاله، خلاصه یا ایده پادکست خود را به زبان فارسی در اینجا بنویسید یا کپی کنید..."
               rows={7}
+              maxLength={8000}
               className="w-full bg-slate-950/70 border border-slate-700/70 rounded-2xl p-4 text-slate-100 text-sm leading-relaxed placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-y"
               dir="rtl"
             />
             <div className="flex flex-wrap items-center justify-between gap-2 mt-2 px-1 text-xs text-slate-400">
               <span>تعداد واژگان: {wordCount.toLocaleString('fa-IR')} کلمه</span>
-              <span>پیشنهاد: بین ۱۰۰ تا ۲۰۰۰ کلمه برای بهترین نتیجه</span>
+              <span>نویسه‌ها: {sourceText.length.toLocaleString('fa-IR')} از ۸۰۰۰</span>
             </div>
           </div>
         </div>
