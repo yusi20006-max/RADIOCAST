@@ -124,11 +124,11 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                       بسته زیپ جامع پروژه آماده دانلود است
                     </h4>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                      شامل ۱۰۰٪ فایل‌های فرانت‌اند و بک‌اند، کامپوننت‌های React 19، سیستم تبدیل صدا به پادکست، استودیوی کاور آرت و تولیدکننده RSS 2.0.
+                      شامل سورس پروژه و فایل‌های لازم برای بررسی و اجرای محلی؛ پیش از انتشار، نسخهٔ بسته را با آخرین تغییرات مخزن تطبیق دهید.
                     </p>
                   </div>
                   <span className="text-[11px] px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 font-mono font-bold shrink-0">
-                    ZIP ~ 115 KB
+                    بستهٔ سورس
                   </span>
                 </div>
 
