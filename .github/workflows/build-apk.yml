@@ -1,0 +1,53 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
+
+    - name: Build Web App
+      run: node node_modules/.bin/vite build
+
+    - name: Initialize Capacitor & Add Android
+      run: |
+        npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
+        npx cap init Radiocast com.radiocast.app --web-dir dist --yes
+        npx cap add android
+
+    - name: Update Capacitor Android Assets
+      run: npx cap sync android
+
+    - name: Set up JDK for Android
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Build Android APK
+      working-directory: ./android
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: radiocast-apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
