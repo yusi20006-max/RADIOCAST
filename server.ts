@@ -425,7 +425,7 @@ let storedPodcastFeed = {
     title: 'رادیو کست | پادکست‌های هوش مصنوعی',
     description: 'پادکست‌های شنیدنی تولید شده با هوش مصنوعی درباره فناوری، فرهنگ، رشد فردی و علم.',
     author: 'استودیو رادیو کست',
-    email: 'podcast@radiocast.studio',
+    email: '',
     category: 'Technology',
     website: process.env.APP_URL || 'https://radiocast.studio',
     language: 'fa',
