@@ -319,6 +319,8 @@ app.post('/api/podcast/synthesize-turn', async (req, res) => {
       speedInstruction = 'Speak in a calm, unhurried, measured pace. ';
     } else if (speed === 'fast') {
       speedInstruction = 'Speak in an energetic, rapid, brisk pace. ';
+    } else if (speed === 'veryFast') {
+      speedInstruction = 'Speak noticeably faster than normal while keeping every word clear and intelligible. ';
     }
 
     // Adjust style based on paragraph-by-paragraph tone
@@ -436,12 +438,17 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
   const feedUrl = `${siteUrl}/api/podcast/rss.xml`;
 
   let itemsXml = '';
-  episodes.forEach((ep, index) => {
+  // A podcast enclosure must point to a real, publicly reachable audio file.
+  // Do not fabricate /audio/... URLs for episodes that are only stored in browser memory.
+  const publishableEpisodes = Array.isArray(episodes)
+    ? episodes.filter((ep) => typeof ep.audioUrl === 'string' && /^https?:\/\//i.test(ep.audioUrl.trim()))
+    : [];
+  publishableEpisodes.forEach((ep, index) => {
     const epDate = ep.createdAt ? new Date(ep.createdAt).toUTCString() : pubDate;
     const epDuration = Math.round(ep.durationSeconds || 180);
     const epNum = ep.episodeNumber || episodes.length - index;
     const coverUrl = ep.coverArtUrl || channel.coverImageUrl;
-    const audioUrl = ep.audioUrl || `${siteUrl}/audio/episode-${ep.id || index}.mp3`;
+    const audioUrl = ep.audioUrl.trim();
 
     itemsXml += `
     <item>
