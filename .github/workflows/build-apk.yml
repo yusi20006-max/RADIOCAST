@@ -54,11 +54,15 @@ jobs:
         npx cap add android --no-interactive || true
         npx cap sync android
 
+    - name: Configure Java 17 for Gradle
+      run: |
+        echo "org.gradle.java.home=$JAVA_HOME" >> android/gradle.properties
+
     - name: Build Android APK
       working-directory: ./android
       run: |
         chmod +x gradlew
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
