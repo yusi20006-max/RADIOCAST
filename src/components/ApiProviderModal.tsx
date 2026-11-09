@@ -48,7 +48,7 @@ const PRESET_PROVIDERS = [
     name: 'Ollama (Local / سرور محلی)',
     baseUrl: 'http://localhost:11434/v1',
     defaultModel: 'llama3',
-    desc: 'مدل‌های لوکال نصب‌شده روی سیستم شما',
+    desc: 'فقط وقتی سرور برنامه روی همان دستگاه اجرا می‌شود؛ در هاست ابری localhost به خود سرور اشاره دارد.',
   },
   {
     name: 'سرویس سفارشی (Custom)',
@@ -177,7 +177,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
             <h3 className="text-xl font-black text-white">تنظیمات موتور هوش مصنوعی</h3>
           </div>
           <p className="text-xs text-slate-400">
-            خوراک اصلی این استودیو هوش مصنوعی Google AI Studio است؛ اما می‌توانید سرویس‌های خارجی دلخواه را نیز متصل و تست سلامت کنید.
+            موتور Gemini برای ساخت سناریو و صدای گویندگان استفاده می‌شود. سرویس خارجی سازگار با OpenAI فقط برای ساخت سناریو به‌کار می‌رود.
           </p>
         </div>
 
