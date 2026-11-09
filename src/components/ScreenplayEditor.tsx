@@ -262,7 +262,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
       </div>
 
       {/* Sound Settings Bar (Speed, BGM, Master Render) */}
-      <div className="sticky top-16 z-30 bg-slate-950/90 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-4 shadow-2xl space-y-4">
+      <div className="static sm:sticky sm:top-16 z-30 bg-slate-950/90 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-4 shadow-2xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Speed Selector */}
