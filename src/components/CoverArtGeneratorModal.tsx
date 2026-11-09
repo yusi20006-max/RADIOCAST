@@ -336,7 +336,7 @@ export const CoverArtGeneratorModal: React.FC<CoverArtGeneratorModalProps> = ({
     // 6. Watermark Footer
     ctx.font = 'bold 24px sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-    ctx.fillText('RADIOCAST STUDIO • 3000x3000px PODCAST ART', width / 2, height - 70);
+    ctx.fillText('RADIOCAST STUDIO • 1400x1400px PODCAST ART', width / 2, height - 70);
 
     ctx.restore();
   };
@@ -355,7 +355,7 @@ export const CoverArtGeneratorModal: React.FC<CoverArtGeneratorModalProps> = ({
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      onToast('کاور با کیفیت ۳۰۰۰×۳۰۰۰ پیکسل دانلود شد.');
+      onToast('کاور PNG با ابعاد ۱۴۰۰×۱۴۰۰ پیکسل دانلود شد.');
     }, 'image/png');
   };
 
@@ -371,8 +371,8 @@ export const CoverArtGeneratorModal: React.FC<CoverArtGeneratorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-5xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-5xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -383,7 +383,7 @@ export const CoverArtGeneratorModal: React.FC<CoverArtGeneratorModalProps> = ({
 
         {/* Modal Header */}
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Palette className="w-6 h-6 text-purple-400" />
             <h3 className="text-xl font-black text-white">
               طراحی و تولید خودکار کاور آرت پادکست (Cover Art Studio)
@@ -401,7 +401,7 @@ export const CoverArtGeneratorModal: React.FC<CoverArtGeneratorModalProps> = ({
             <div className="relative w-full max-w-[360px] aspect-square rounded-3xl overflow-hidden shadow-2xl ring-4 ring-purple-500/30 group">
               <canvas ref={canvasRef} className="w-full h-full object-cover" />
               <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] text-purple-200 font-bold border border-white/10">
-                1400×1400 (3000px Export)
+                خروجی PNG با ابعاد ۱۴۰۰×۱۴۰۰
               </div>
             </div>
 

@@ -33,10 +33,10 @@ export const TONE_OPTIONS: { id: PodcastTone; labelFa: string; descFa: string; e
 ];
 
 export const SPEED_OPTIONS: { id: PlaybackSpeed; labelFa: string; multiplier: number; descFa: string }[] = [
-  { id: 'slow', labelFa: 'آهسته (۰.۸x)', multiplier: 0.8, descFa: 'مناسب آموزش، مباحث عمیق و زبان‌آموزی' },
-  { id: 'normal', labelFa: 'استاندارد (۱.۰x)', multiplier: 1.0, descFa: 'سرعت طبیعی گفتگوی رادیویی' },
-  { id: 'fast', labelFa: 'سریع (۱.۲۵x)', multiplier: 1.25, descFa: 'ریتم پرشتاب و پرانرژی برای خلاصه‌ها' },
-  { id: 'veryFast', labelFa: 'برق‌آسا (۱.۵x)', multiplier: 1.5, descFa: 'مرور سریع اطلاعات فشرده' },
+  { id: 'slow', labelFa: 'آهسته', multiplier: 0.8, descFa: 'خوانش با تمایل به ریتم آهسته؛ سرعت دقیق را در پلیر تنظیم کنید' },
+  { id: 'normal', labelFa: 'استاندارد', multiplier: 1.0, descFa: 'خوانش با ریتم متعادل؛ سرعت دقیق را در پلیر تنظیم کنید' },
+  { id: 'fast', labelFa: 'سریع', multiplier: 1.25, descFa: 'خوانش سریع‌تر؛ سرعت دقیق را در پلیر تنظیم کنید' },
+  { id: 'veryFast', labelFa: 'خیلی سریع', multiplier: 1.5, descFa: 'خوانش بسیار سریع؛ سرعت دقیق را در پلیر تنظیم کنید' },
 ];
 
 export const FORMAT_OPTIONS: { id: PodcastFormat; labelFa: string; descFa: string; icon: string }[] = [
@@ -47,11 +47,11 @@ export const FORMAT_OPTIONS: { id: PodcastFormat; labelFa: string; descFa: strin
 ];
 
 export const BGM_PRESETS: BgmPreset[] = [
-  { id: 'lofi', nameFa: 'لوفای دنج و آرام (Chill Lo-Fi)', descriptionFa: 'آکوردهای ملایم رودز، ریتم آرام‌بخش و گرمای وینیل', icon: 'Headphones', tempo: '۷۵ BPM' },
-  { id: 'ambient', nameFa: 'امبینت عمیق تفکر (Deep Focus)', descriptionFa: 'پدهای فضایی شناور، آرامش‌بخش ذهن بدون حواس‌پرتی', icon: 'CloudRain', tempo: '۶۰ BPM' },
-  { id: 'acoustic', nameFa: 'پادکست رادیویی انگیزشی (Acoustic)', descriptionFa: 'سازهای زهی شاداب، ریتمیک، گرم و دوستانه', icon: 'Music', tempo: '۱۰۵ BPM' },
-  { id: 'cinematic', nameFa: 'سینمایی و پرتعلیق (Cinematic)', descriptionFa: 'بیس بم عمیق و آرپژ رازآلود، مناسب داستان‌های معمایی', icon: 'Film', tempo: '۸۰ BPM' },
-  { id: 'iranian-fusion', nameFa: 'تلفیقی سنتی ایرانی (Persian Fusion)', descriptionFa: 'هارمونی مقام‌های اصیل ایرانی در قالبی مدرن و گوش‌نواز', icon: 'Sparkles', tempo: '۹۰ BPM' },
+  { id: 'lofi', nameFa: 'لوفای دنج و آرام (Chill Lo-Fi)', descriptionFa: 'بافت و الگوی صوتی الگوریتمی با حس لوفای و ریتم آرام', icon: 'Headphones', tempo: '۷۵ BPM' },
+  { id: 'ambient', nameFa: 'امبینت عمیق تفکر (Deep Focus)', descriptionFa: 'بافت‌های سینتی آرام و کم‌تحرک برای تمرکز', icon: 'CloudRain', tempo: '۶۰ BPM' },
+  { id: 'acoustic', nameFa: 'پادکست رادیویی انگیزشی (Acoustic)', descriptionFa: 'الگوی صوتی الگوریتمی با ریتم گرم و دوستانه', icon: 'Music', tempo: '۱۰۵ BPM' },
+  { id: 'cinematic', nameFa: 'سینمایی و پرتعلیق (Cinematic)', descriptionFa: 'بیس و آرپژ سینتی الگوریتمی برای فضای داستانی و پرتعلیق', icon: 'Film', tempo: '۸۰ BPM' },
+  { id: 'iranian-fusion', nameFa: 'تلفیقی سنتی ایرانی (Persian Fusion)', descriptionFa: 'الگوهای هارمونیک الگوریتمی با الهام از فضای موسیقی ایرانی؛ بدون اجرای ساز زنده', icon: 'Sparkles', tempo: '۹۰ BPM' },
   { id: 'none', nameFa: 'بدون موسیقی (صرفاً صدای گویندگان)', descriptionFa: 'صدای خالص بدون افکت و موسیقی پس‌زمینه', icon: 'VolumeX', tempo: 'خاموش' },
 ];
 

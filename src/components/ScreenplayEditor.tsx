@@ -157,9 +157,9 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="w-full min-w-0 max-w-5xl mx-auto space-y-8 pb-20">
       {/* Back button and Episode Header Card */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={onBackToInput}
           className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl transition-all"
@@ -262,7 +262,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
       </div>
 
       {/* Sound Settings Bar (Speed, BGM, Master Render) */}
-      <div className="sticky top-16 z-30 bg-slate-950/90 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-4 shadow-2xl space-y-4">
+      <div className="static sm:sticky sm:top-16 z-30 bg-slate-950/90 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-4 shadow-2xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             {/* Speed Selector */}

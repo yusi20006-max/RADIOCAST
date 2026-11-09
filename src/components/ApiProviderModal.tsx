@@ -48,7 +48,7 @@ const PRESET_PROVIDERS = [
     name: 'Ollama (Local / سرور محلی)',
     baseUrl: 'http://localhost:11434/v1',
     defaultModel: 'llama3',
-    desc: 'مدل‌های لوکال نصب‌شده روی سیستم شما',
+    desc: 'فقط وقتی سرور برنامه روی همان دستگاه اجرا می‌شود؛ در هاست ابری localhost به خود سرور اشاره دارد.',
   },
   {
     name: 'سرویس سفارشی (Custom)',
@@ -160,8 +160,8 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -172,12 +172,12 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
 
         {/* Modal Header */}
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Cpu className="w-6 h-6 text-purple-400" />
             <h3 className="text-xl font-black text-white">تنظیمات موتور هوش مصنوعی</h3>
           </div>
           <p className="text-xs text-slate-400">
-            خوراک اصلی این استودیو هوش مصنوعی Google AI Studio است؛ اما می‌توانید سرویس‌های خارجی دلخواه را نیز متصل و تست سلامت کنید.
+            موتور Gemini برای ساخت سناریو و صدای گویندگان استفاده می‌شود. سرویس خارجی سازگار با OpenAI فقط برای ساخت سناریو به‌کار می‌رود.
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  موتور اصلی پردازش سناریوها با جدیدترین مدل‌های هوش مصنوعی صوتی و متنی گوگل، با بالاترین کیفیت، بیان طبیعی فارسی و بدون نیاز به ورود کلید.
+                  موتور پیش‌فرض برای ساخت سناریو و تولید صدا. در این پنجره نیازی به وارد کردن کلید نیست؛ اما سرور میزبان باید با متغیر GEMINI_API_KEY پیکربندی شده باشد.
                 </p>
               </div>
             </div>
@@ -390,7 +390,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
         <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5">
           <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            <strong>نکته امنیت و پایداری:</strong> کلیدهای خارجی شما صرفاً در مرورگر ذخیره شده و از طریق پروکسی سرور برای تولید ارسال می‌شوند. در صورت بروز هرگونه قطعی یا محدودیت اعتبار در سرویس خارجی، برنامه به صورت خودکار به هوش مصنوعی پرسرعت Google AI Studio سوئیچ می‌کند تا فرآیند ساخت پادکست متوقف نشود.
+            <strong>نکته امنیت و پایداری:</strong> کلید سرویس خارجی در حافظه محلی مرورگر (localStorage) ذخیره می‌شود و برای هر درخواست به سرور این برنامه ارسال خواهد شد؛ روی دستگاه مشترک آن را ذخیره نکنید. در صورت خطای سرویس خارجی، برنامه تلاش می‌کند سناریو را با Gemini بسازد؛ این جایگزینی فقط در صورت پیکربندی و در دسترس بودن GEMINI_API_KEY روی سرور انجام می‌شود. تولید صدای گویندگان همچنان از سرویس صوتی Gemini استفاده می‌کند.
           </p>
         </div>
       </div>

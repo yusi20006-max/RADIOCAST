@@ -144,8 +144,8 @@ export const ShareAndExportModal: React.FC<ShareAndExportModalProps> = ({
   const mp3SizeMb = mp3Blob ? (mp3Blob.size / (1024 * 1024)).toFixed(2) : '1.5';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -156,12 +156,12 @@ export const ShareAndExportModal: React.FC<ShareAndExportModalProps> = ({
 
         {/* Modal Header */}
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Share2 className="w-6 h-6 text-purple-400" />
             <h3 className="text-xl font-black text-white">ذخیره و اشتراک‌گذاری پادکست</h3>
           </div>
           <p className="text-xs text-slate-400">
-            فایل صوتی میکس‌شده را دانلود کرده یا مستقیماً در شبکه‌های اجتماعی منتشر کنید.
+            فایل صوتی میکس‌شده را دانلود کنید یا لینک برنامه و توضیحات آن را در شبکه‌های اجتماعی به اشتراک بگذارید.
           </p>
         </div>
 
@@ -339,9 +339,9 @@ export const ShareAndExportModal: React.FC<ShareAndExportModalProps> = ({
                   <div className="space-y-0.5">
                     <span className="text-xs font-bold text-amber-200 group-hover:text-white flex items-center gap-1.5">
                       <Rss className="w-3.5 h-3.5 text-amber-400" />
-                      فید رسمی پادکست (RSS 2.0)
+                      پیش‌نویس فایل RSS 2.0
                     </span>
-                    <p className="text-[10px] text-slate-400">لینک اختصاصی برای ثبت در Castbox و Spotify</p>
+                    <p className="text-[10px] text-slate-400">دریافت XML؛ انتشار به میزبان عمومی و فایل صوتی نیاز دارد</p>
                   </div>
                   <ExternalLink className="w-4 h-4 text-amber-400 shrink-0" />
                 </button>

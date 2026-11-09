@@ -1,54 +1,114 @@
 // Service Worker for RadioCast Podcast Studio PWA
-const CACHE_NAME = 'radiocast-v1';
+const CACHE_NAME = 'radiocast-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/icon-maskable-512.png',
+  '/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch(() => {});
-    })
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.all(
+      PRECACHE_ASSETS.map(async (asset) => {
+        try {
+          const response = await fetch(asset);
+          if (response.ok) await cache.put(asset, response);
+        } catch {
+          // A missing optional icon must not prevent the app shell from being cached.
+        }
+      })
+    );
+
+    // Cache the JS and CSS bundles referenced by the production HTML on first install.
+    const htmlResponse = await cache.match('/index.html');
+    if (htmlResponse) {
+      const html = await htmlResponse.text();
+      const assetPaths = [...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css)(?:\?[^"]*)?)"/g)]
+        .map((match) => match[1])
+        .filter((asset) => asset.startsWith('/'));
+
+      await Promise.all(
+        assetPaths.map(async (asset) => {
+          try {
+            const response = await fetch(asset);
+            if (response.ok) await cache.put(asset, response);
+          } catch {
+            // Static bundles can be cached on their first later successful request.
+          }
+        })
+      );
+    }
+  })());
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key.startsWith('radiocast-') && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    )
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests, pass through audio API calls to network
-  if (event.request.method !== 'GET' || event.request.url.includes('/api/')) {
+  const request = event.request;
+  const url = new URL(request.url);
+
+  // APIs require a live server and must never be served from the app-shell cache.
+  if (
+    request.method !== 'GET' ||
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith('/api/')
+  ) {
     return;
   }
 
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cachedPage = await caches.match('/index.html');
+          return cachedPage || new Response('RadioCast is unavailable offline.', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+        })
+    );
+    return;
+  }
+
+  // Cache same-origin static assets after their first successful network response.
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        // Fallback to cache index for navigation
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+    caches.match(request).then(async (cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      try {
+        const response = await fetch(request);
+        if (response.ok) {
+          const copy = response.clone();
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, copy);
         }
-      });
+        return response;
+      } catch {
+        return new Response('', { status: 504, statusText: 'Offline and asset not cached' });
+      }
     })
   );
 });

@@ -10,8 +10,8 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-5 left-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
@@ -39,7 +39,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               ورود متن و انتخاب قالب
             </h4>
             <p className="text-slate-400 text-xs">
-              هر نوع متنی اعم از مقاله‌های علمی، داستان‌ها، اخبار یا خلاصه‌های کتاب را می‌توانید وارد کنید. سپس از بین قالب‌های گفتگوی دونفره (شبیه به NotebookLM)، تک‌نفره، مصاحبه یا کپسول خلاصه یکی را انتخاب کنید.
+              متن مقاله، داستان، خبر یا خلاصهٔ کتاب را تا سقف ۸۰۰۰ نویسه می‌توانید وارد کنید. سپس از بین قالب‌های گفتگوی دونفره (شبیه به NotebookLM)، تک‌نفره، مصاحبه یا کپسول خلاصه یکی را انتخاب کنید.
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               تنظیم لحن و سرعت صدا (همراه با لحن تطبیقی پاراگراف‌ها)
             </h4>
             <p className="text-slate-400 text-xs">
-              لحن کلی گفتار (شاد، جدی، دوستانه، داستانی یا طنزآمیز) و سرعت خوانش قابل تنظیم هستند. همچنین با فعال‌سازی <strong>«لحن تطبیقی پاراگراف به پاراگراف»</strong>، جملات پرسشی به صورت خودکار با لحن کنجکاوانه، تعجب‌ها با هیجان و شگفتی، و استنتاج‌ها با لحنی متفکرانه ادا می‌شوند. همچنین می‌توانید در ویرایشگر، لحن هر پاراگراف را به صورت جداگانه تغییر دهید.
+              لحن کلی گفتار (شاد، جدی، دوستانه، داستانی یا طنزآمیز) و تمایل سرعت خوانش قابل تنظیم هستند؛ سرعت دقیق پخش را می‌توانید در پلیر تغییر دهید. همچنین با فعال‌سازی <strong>«لحن تطبیقی پاراگراف به پاراگراف»</strong>، جملات پرسشی به صورت خودکار با لحن کنجکاوانه، تعجب‌ها با هیجان و شگفتی، و استنتاج‌ها با لحنی متفکرانه ادا می‌شوند. همچنین می‌توانید در ویرایشگر، لحن هر پاراگراف را به صورت جداگانه تغییر دهید.
             </p>
           </div>
 
@@ -65,7 +65,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               موسیقی پس‌زمینه و افکت‌ها (Audio Ducking)
             </h4>
             <p className="text-slate-400 text-xs">
-              شما می‌توانید از انواع استایل‌های موسیقی (لوفای، امبینت، آکوستیک رادیویی، سینمایی یا سنتی تلفیقی ایرانی) استفاده کنید. سیستم به صورت خودکار قابلیت Ducking دارد؛ یعنی موقع صحبت گوینده، صدای موسیقی آرام می‌شود و در فواصل سکوت و اینترو بالا می‌آید.
+              می‌توانید از چند سبک موسیقی زمینهٔ الگوریتمی (لوفای، امبینت، ریتم گرم، سینمایی یا الهام‌گرفته از موسیقی ایرانی) استفاده کنید؛ این‌ها اجرای ساز زنده یا قطعات ضبط‌شده نیستند. سیستم به صورت خودکار قابلیت Ducking دارد؛ یعنی موقع صحبت گوینده، صدای موسیقی آرام می‌شود و در فواصل سکوت و اینترو بالا می‌آید.
             </p>
           </div>
 
@@ -75,10 +75,10 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               <span className="w-6 h-6 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xs">
                 ۴
               </span>
-              دانلود MP3 و انتشار در پلتفرم‌ها
+              دانلود و اشتراک‌گذاری خروجی
             </h4>
             <p className="text-slate-400 text-xs">
-              فایل نهایی به صورت مستقیم با فرمت استاندارد MP3 (۱۹۲kbps) قابل دانلود است. همچنین می‌توانید Show Notes، سرفصل‌های زمانی و متن کتبی را دریافت کرده یا مستقیماً در تلگرام، واتس‌اپ و شبکه‌های اجتماعی به اشتراک بگذارید.
+              پس از موفقیت تولید صدا و میکس، فایل MP3 با نرخ ۱۹۲ کیلوبیت‌برثانیه قابل دانلود است. همچنین می‌توانید متن دیالوگ‌ها و یادداشت‌های برنامه را دریافت یا لینک برنامه را به اشتراک بگذارید.
             </p>
           </div>
         </div>

@@ -51,17 +51,17 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in" dir="rtl">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in" dir="rtl">
+      <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
+        <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-slate-800 bg-slate-950/40">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
               <Download className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white">دریافت خروجی، فایل ZIP و APK اپلیکیشن</h3>
-              <p className="text-xs text-slate-400">سورس‌کد کامل پروژه، راهنمای ساخت فایل نصبی APK اندروید و گیت‌هاب</p>
+              <p className="text-xs text-slate-400">دریافت بستهٔ ZIP موجود، راهنمای ساخت APK و دسترسی به مخزن GitHub</p>
             </div>
           </div>
           <button
@@ -73,7 +73,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
         </div>
 
         {/* Tab selection */}
-        <div className="flex items-center gap-2 p-3 bg-slate-950/70 border-b border-slate-800/80">
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-950/70 border-b border-slate-800/80">
           <button
             onClick={() => setActiveTab('zip')}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -83,7 +83,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
             }`}
           >
             <FolderArchive className="w-4 h-4" />
-            <span>دانلود سورس کامل (ZIP)</span>
+            <span>دانلود بستهٔ ZIP</span>
           </button>
 
           <button
@@ -112,7 +112,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-slate-200">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-slate-200 min-w-0">
           {/* TAB 1: ZIP FILE DOWNLOAD */}
           {activeTab === 'zip' && (
             <div className="space-y-5">
@@ -121,14 +121,14 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   <div>
                     <h4 className="text-sm font-extrabold text-white flex items-center gap-2">
                       <FolderArchive className="w-4 h-4 text-purple-400" />
-                      بسته زیپ جامع پروژه آماده دانلود است
+                      فایل ZIP ذخیره‌شده در مخزن آماده دریافت است
                     </h4>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                      شامل ۱۰۰٪ فایل‌های فرانت‌اند و بک‌اند، کامپوننت‌های React 19، سیستم تبدیل صدا به پادکست، استودیوی کاور آرت و تولیدکننده RSS 2.0.
+                      این فایل یک snapshot از سورس است و ممکن است آخرین تغییرات مخزن را نداشته باشد. برای دریافت نسخهٔ به‌روز، مخزن GitHub را باز کنید.
                     </p>
                   </div>
                   <span className="text-[11px] px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 font-mono font-bold shrink-0">
-                    ZIP ~ 115 KB
+                    بستهٔ سورس
                   </span>
                 </div>
 
@@ -138,7 +138,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-purple-600/40 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Download className="w-5 h-5 animate-bounce" />
-                  <span>دانلود آنی فایل radiocast-podcast-studio.zip</span>
+                  <span>دریافت فایل radiocast-podcast-studio.zip</span>
                 </a>
               </div>
 
@@ -184,7 +184,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   <code>npm install && npm run dev</code>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  فایل <span className="font-mono text-slate-200">.env.example</span> را به <span className="font-mono text-slate-200">.env</span> تغییر داده و کلید Gemini خود را در آن قرار دهید.
+                  فایل <span className="font-mono text-slate-200">.env.example</span> را به <span className="font-mono text-slate-200">.env</span> کپی کنید و کلید Gemini را فقط روی سرور امن قرار دهید؛ کلید را داخل کد فرانت‌اند یا مخزن عمومی قرار ندهید.
                 </p>
               </div>
             </div>
@@ -199,7 +199,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   دو روش ساده برای استفاده در گوشی اندروید:
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  چون این برنامه یک وب‌اپلیکیشن پیشرفته (PWA) است، شما می‌توانید آن را بدون نیاز به دانلود فایل خام، مستقیماً مانند یک اپلیکیشن نصب کنید، یا در ۱ دقیقه از آن فایل خروجی APK بگیرید.
+                  این برنامه را می‌توانید از مرورگر به صفحهٔ اصلی گوشی اضافه کنید. ساخت APK با ابزارهایی مانند PWABuilder به اعتبارسنجی PWA، تنظیمات بسته و امضای خروجی وابسته است و زمان یا نتیجهٔ آن تضمین‌شده نیست.
                 </p>
               </div>
 
@@ -214,7 +214,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   </h5>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  آدرس این برنامه را در مرورگر کروم یا سامسونگ گوشی اندرویدی خود باز کنید. منوی ۳ نقطه مرورگر را باز کرده و گزینه <strong className="text-emerald-300">«افزودن به صفحه اصلی» (Install app / Add to Home screen)</strong> را لمس کنید. برنامه با آیکون اختصاصی و پنجره تمام‌صفحه دقیقاً مانند یک اپلیکیشن بومی روی گوشی شما قرار می‌گیرد.
+                  آدرس این برنامه را در مرورگر کروم یا سامسونگ گوشی اندرویدی خود باز کنید. منوی ۳ نقطه مرورگر را باز کرده و گزینه <strong className="text-emerald-300">«افزودن به صفحه اصلی» (Install app / Add to Home screen)</strong> را لمس کنید. برنامه با آیکون اختصاصی در پنجرهٔ مستقل مرورگر اجرا می‌شود؛ این نسخه همچنان یک وب‌اپلیکیشن است و همهٔ قابلیت‌های یک اپ بومی را ندارد.
                 </p>
                 <div className="flex items-center gap-2">
                   <input
@@ -240,17 +240,17 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                     ۲
                   </span>
                   <h5 className="text-xs sm:text-sm font-bold text-white">
-                    تولید فایل مستقیم APK با PWABuilder (رایگان در ۱ دقیقه)
+                    ساخت بستهٔ اندروید با PWABuilder
                   </h5>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  سایت رسمی و رایگان <strong>PWABuilder</strong> (محصول مایکروسافت با مشارکت گوگل) هر آدرس وب استانداردی را مستقیماً به بسته APK اندروید تبدیل می‌کند:
+                  ابزار <strong>PWABuilder</strong> می‌تواند برای وب‌اپلیکیشن‌های سازگار بستهٔ اندروید بسازد. ممکن است برای تکمیل تنظیمات، اعتبارسنجی دامنه و امضای بسته به مراحل بیشتری نیاز باشد:
                 </p>
                 <ol className="text-xs text-slate-400 space-y-1 list-decimal list-inside pr-1">
                   <li>لینک بالا را کپی کنید.</li>
                   <li>وارد سایت <a href="https://www.pwabuilder.com" target="_blank" rel="noreferrer" className="text-purple-400 underline font-mono">pwabuilder.com</a> شوید.</li>
                   <li>لینک را در کادر قرار داده و دکمه Start را بزنید.</li>
-                  <li>در بخش Android دکمه <strong>Generate APK</strong> را بزنید تا فایل نصبی بلافاصله تحویل داده شود.</li>
+                  <li>در بخش Android تنظیمات بسته را بررسی و فرایند ساخت را دنبال کنید؛ تحویل APK فوری یا بدون خطا تضمین نمی‌شود.</li>
                 </ol>
                 <a
                   href={`https://www.pwabuilder.com/?url=${encodeURIComponent(currentUrl)}`}
@@ -265,7 +265,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
 
               {/* Method 3: Capacitor */}
               <div className="p-3.5 rounded-xl bg-slate-950/50 border border-slate-800/80 text-[11px] text-slate-400 leading-relaxed">
-                💡 <span className="text-slate-300 font-bold">برای برنامه‌نویسان:</span> با دانلود فایل ZIP سورس‌کد، می‌توانید پکیج <code className="text-purple-300 font-mono">@capacitor/android</code> را نصب کرده و با Android Studio خروجی APK آفلاین سفارشی تهیه کنید.
+                💡 <span className="text-slate-300 font-bold">برای برنامه‌نویسان:</span> با دانلود سورس و ساخت پروژه با Capacitor می‌توانید APK اختصاصی بسازید. نصب برنامه به‌تنهایی به معنی اجرای آفلاین نیست؛ تولید سناریو و صدا همچنان به سرور و اینترنت نیاز دارد.
               </div>
             </div>
           )}

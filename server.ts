@@ -1,4 +1,7 @@
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -9,6 +12,103 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+type RateLimitBucket = { count: number; resetAt: number };
+const rateLimitBuckets = new Map<string, RateLimitBucket>();
+
+function rateLimit(maxRequests: number, windowMs: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const now = Date.now();
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    let bucket = rateLimitBuckets.get(key);
+
+    if (!bucket || bucket.resetAt <= now) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      rateLimitBuckets.set(key, bucket);
+    }
+
+    if (bucket.count >= maxRequests) {
+      res.setHeader('Retry-After', String(Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))));
+      return res.status(429).json({ error: 'تعداد درخواست‌ها بیش از حد مجاز است؛ کمی بعد دوباره تلاش کنید.' });
+    }
+
+    bucket.count += 1;
+
+    if (rateLimitBuckets.size > 5000) {
+      for (const [entryKey, entry] of rateLimitBuckets) {
+        if (entry.resetAt <= now) rateLimitBuckets.delete(entryKey);
+      }
+    }
+
+    return next();
+  };
+}
+
+function isBlockedIpAddress(address: string): boolean {
+  const normalized = address.toLowerCase().split('%')[0];
+
+  if (isIP(normalized) === 4) {
+    const parts = normalized.split('.').map(Number);
+    const [a, b, c] = parts;
+    return (
+      a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && (b === 168 || b === 0 || (b === 2 && c === 0))) ||
+      (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) ||
+      (a === 203 && b === 0 && c === 113) ||
+      (a === 100 && b >= 64 && b <= 127)
+    );
+  }
+
+  if (isIP(normalized) === 6) {
+    if (normalized === '::' || normalized === '::1') return true;
+    if (/^(fc|fd|fe[89ab])/i.test(normalized)) return true;
+    if (normalized.startsWith('::ffff:')) {
+      const mapped = normalized.slice(7);
+      if (isIP(mapped) === 4) return isBlockedIpAddress(mapped);
+    }
+    return false;
+  }
+
+  return true;
+}
+
+async function getSafeExternalBaseUrl(rawUrl: string): Promise<string> {
+  const parsed = new URL(rawUrl);
+  if (parsed.username || parsed.password) {
+    throw new Error('آدرس API نباید شامل نام کاربری یا گذرواژه باشد.');
+  }
+
+  const hostname = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase().replace(/\.$/, '');
+  const isLocalDevelopment =
+    process.env.NODE_ENV !== 'production' &&
+    parsed.protocol === 'http:' &&
+    ['localhost', '127.0.0.1', '::1'].includes(hostname);
+
+  if (parsed.protocol !== 'https:' && !isLocalDevelopment) {
+    throw new Error('برای سرویس خارجی فقط آدرس HTTPS مجاز است.');
+  }
+
+  if (hostname.endsWith('.local') || hostname.endsWith('.internal') || hostname === 'metadata.google.internal') {
+    throw new Error('آدرس‌های شبکه داخلی برای سرویس خارجی مجاز نیستند.');
+  }
+
+  if (!isLocalDevelopment) {
+    if (isIP(hostname)) {
+      if (isBlockedIpAddress(hostname)) {
+        throw new Error('آدرس‌های IP خصوصی یا رزروشده مجاز نیستند.');
+      }
+    } else {
+      const resolved = await lookup(hostname, { all: true, verbatim: true });
+      if (!resolved.length || resolved.some((entry) => isBlockedIpAddress(entry.address))) {
+        throw new Error('مقصد API به یک آدرس شبکه داخلی یا رزروشده اشاره می‌کند.');
+      }
+    }
+  }
+
+  return parsed.toString().replace(/\/+$/, '');
+}
 
 app.use(express.json({ limit: '15mb' }));
 
@@ -25,7 +125,7 @@ const ai = new GoogleGenAI({
 /**
  * Health check endpoint for external third-party LLM APIs
  */
-app.post('/api/external-provider/health-check', async (req, res) => {
+app.post('/api/external-provider/health-check', rateLimit(10, 60_000), async (req, res) => {
   const startTime = Date.now();
   try {
     const { baseUrl, apiKey, model = 'gpt-4o-mini' } = req.body;
@@ -37,11 +137,12 @@ app.post('/api/external-provider/health-check', async (req, res) => {
       return res.status(400).json({ healthy: false, error: 'کلید API (API Key) وارد نشده است.' });
     }
 
-    const cleanBaseUrl = baseUrl.trim().replace(/\/+$/, '');
+    const cleanBaseUrl = await getSafeExternalBaseUrl(baseUrl);
 
     // Test with a lightweight ping to /chat/completions
     const response = await fetch(`${cleanBaseUrl}/chat/completions`, {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey.trim()}`,
@@ -78,7 +179,7 @@ app.post('/api/external-provider/health-check', async (req, res) => {
     return res.json({
       healthy: true,
       latencyMs,
-      message: 'اتصال به سرویس با موفقیت برقرار شد و پاسخ آزمایشی در کمتر از ۱ ثانیه دریافت گردید.',
+      message: 'اتصال به سرویس برقرار شد و پاسخ آزمایشی دریافت گردید.',
       model: model || data.model || 'سرویس متصل',
     });
   } catch (error: any) {
@@ -94,13 +195,13 @@ app.post('/api/external-provider/health-check', async (req, res) => {
 /**
  * Endpoint to generate structured Persian podcast script from raw text
  */
-app.post('/api/podcast/generate-script', async (req, res) => {
+app.post('/api/podcast/generate-script', rateLimit(6, 60_000), async (req, res) => {
   try {
     const {
       sourceText,
       format = 'dual', // 'dual' | 'solo' | 'interview' | 'briefing'
       tone = 'friendly', // 'friendly' | 'serious' | 'energetic' | 'dramatic' | 'humorous'
-      speed = 'normal', // 'slow' | 'normal' | 'fast'
+      speed = 'normal', // 'slow' | 'normal' | 'fast' | 'veryFast'
       host1Name = 'نیما',
       host2Name = 'سارا',
       durationTarget = 'medium', // 'short' | 'medium' | 'detailed'
@@ -111,6 +212,9 @@ app.post('/api/podcast/generate-script', async (req, res) => {
 
     if (!sourceText || typeof sourceText !== 'string' || !sourceText.trim()) {
       return res.status(400).json({ error: 'لطفاً متن ورودی را وارد نمایید.' });
+    }
+    if (sourceText.length > 8000) {
+      return res.status(400).json({ error: 'متن ورودی بیش از سقف ۸۰۰۰ نویسه است؛ لطفاً آن را کوتاه‌تر کنید.' });
     }
 
     const toneDescriptions: Record<string, string> = {
@@ -147,7 +251,7 @@ ${toneDescriptions[tone] || toneDescriptions.friendly}
 تعداد بخش‌ها:
 ${turnCounts[durationTarget] || turnCounts.medium}
 
-سرعت خوانش مدنظر: ${speed === 'slow' ? 'آهسته و آرام' : speed === 'fast' ? 'سریع و ریتمیک' : 'طبیعی و متعادل'}
+سرعت خوانش مدنظر: ${speed === 'slow' ? 'آهسته و آرام' : speed === 'veryFast' ? 'بسیار سریع و ریتمیک با حفظ وضوح' : speed === 'fast' ? 'سریع و ریتمیک' : 'طبیعی و متعادل'}
 
 ${
   dynamicToneEnabled
@@ -179,11 +283,12 @@ ${sourceText.slice(0, 8000)}
     // Check if user requested an external provider (OpenAI, OpenRouter, Groq, etc.)
     if (aiProvider === 'external' && externalConfig?.apiKey && externalConfig?.baseUrl) {
       try {
-        const cleanBaseUrl = externalConfig.baseUrl.trim().replace(/\/+$/, '');
+        const cleanBaseUrl = await getSafeExternalBaseUrl(externalConfig.baseUrl);
         const systemInstruction = 'You are an award-winning Persian podcast director and audio scriptwriter. Output strictly valid JSON matching the podcast screenplay schema with fields: title, episodeSummary, genre, suggestedBgm, tags, chapters, script.';
 
         const extResponse = await fetch(`${cleanBaseUrl}/chat/completions`, {
           method: 'POST',
+          redirect: 'error',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${externalConfig.apiKey.trim()}`,
@@ -298,7 +403,7 @@ ${sourceText.slice(0, 8000)}
 /**
  * Endpoint to synthesize high-quality audio using gemini-3.8-flash-tts / gemini-3.8-flash-lite-tts
  */
-app.post('/api/podcast/synthesize-turn', async (req, res) => {
+app.post('/api/podcast/synthesize-turn', rateLimit(90, 60_000), async (req, res) => {
   try {
     const {
       text,
@@ -319,6 +424,8 @@ app.post('/api/podcast/synthesize-turn', async (req, res) => {
       speedInstruction = 'Speak in a calm, unhurried, measured pace. ';
     } else if (speed === 'fast') {
       speedInstruction = 'Speak in an energetic, rapid, brisk pace. ';
+    } else if (speed === 'veryFast') {
+      speedInstruction = 'Speak noticeably faster than normal while keeping every word clear and intelligible. ';
     }
 
     // Adjust style based on paragraph-by-paragraph tone
@@ -387,7 +494,7 @@ app.post('/api/podcast/synthesize-turn', async (req, res) => {
 /**
  * Endpoint to refine a specific dialogue turn (e.g. make funnier, shorter, deeper)
  */
-app.post('/api/podcast/refine-turn', async (req, res) => {
+app.post('/api/podcast/refine-turn', rateLimit(20, 60_000), async (req, res) => {
   try {
     const { currentText, instruction, speakerName, tone } = req.body;
 
@@ -420,7 +527,7 @@ let storedPodcastFeed = {
     title: 'رادیو کست | پادکست‌های هوش مصنوعی',
     description: 'پادکست‌های شنیدنی تولید شده با هوش مصنوعی درباره فناوری، فرهنگ، رشد فردی و علم.',
     author: 'استودیو رادیو کست',
-    email: 'podcast@radiocast.studio',
+    email: '',
     category: 'Technology',
     website: process.env.APP_URL || 'https://radiocast.studio',
     language: 'fa',
@@ -433,15 +540,19 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
   const currentYear = new Date().getFullYear();
   const pubDate = new Date().toUTCString();
   const siteUrl = appUrl.replace(/\/+$/, '');
-  const feedUrl = `${siteUrl}/api/podcast/rss.xml`;
 
   let itemsXml = '';
-  episodes.forEach((ep, index) => {
+  // A podcast enclosure must point to a real, publicly reachable audio file.
+  // Do not fabricate /audio/... URLs for episodes that are only stored in browser memory.
+  const publishableEpisodes = Array.isArray(episodes)
+    ? episodes.filter((ep) => typeof ep.audioUrl === 'string' && /^https?:\/\//i.test(ep.audioUrl.trim()))
+    : [];
+  publishableEpisodes.forEach((ep, index) => {
     const epDate = ep.createdAt ? new Date(ep.createdAt).toUTCString() : pubDate;
     const epDuration = Math.round(ep.durationSeconds || 180);
     const epNum = ep.episodeNumber || episodes.length - index;
     const coverUrl = ep.coverArtUrl || channel.coverImageUrl;
-    const audioUrl = ep.audioUrl || `${siteUrl}/audio/episode-${ep.id || index}.mp3`;
+    const audioUrl = ep.audioUrl.trim();
 
     itemsXml += `
     <item>
@@ -450,7 +561,7 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
       <link>${siteUrl}</link>
       <guid isPermaLink="false">radiocast-${ep.id || index}</guid>
       <pubDate>${epDate}</pubDate>
-      <enclosure url="${audioUrl}" length="5242880" type="audio/mpeg" />
+      <enclosure url="${audioUrl}" length="${ep.audioLength || 0}" type="audio/mpeg" />
       <itunes:title><![CDATA[${ep.title || 'اپیزود پادکست'}]]></itunes:title>
       <itunes:author><![CDATA[${channel.author}]]></itunes:author>
       <itunes:summary><![CDATA[${ep.episodeSummary || ''}]]></itunes:summary>
@@ -475,54 +586,41 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
     <itunes:author><![CDATA[${channel.author}]]></itunes:author>
     <description><![CDATA[${channel.description}]]></description>
     <itunes:summary><![CDATA[${channel.description}]]></itunes:summary>
+    ${channel.email ? `
     <itunes:owner>
       <itunes:name><![CDATA[${channel.author}]]></itunes:name>
       <itunes:email>${channel.email}</itunes:email>
-    </itunes:owner>
+    </itunes:owner>` : ''}
     <itunes:explicit>no</itunes:explicit>
     <itunes:category text="${channel.category || 'Technology'}" />
     <itunes:image href="${channel.coverImageUrl}" />
-    <atom:link href="${feedUrl}" rel="self" type="application/rss+xml"/>
     ${itemsXml}
   </channel>
 </rss>`;
 }
 
 /**
- * Public RSS Feed endpoint for Apple Podcasts, Spotify, Castbox, etc.
+ * Public RSS hosting is not enabled; this route intentionally returns 501.
  */
-app.get('/api/podcast/rss.xml', (req, res) => {
-  const host = req.get('host') || 'localhost:3000';
-  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-  const appUrl = process.env.APP_URL || `${protocol}://${host}`;
-
-  const xml = buildRssXml(storedPodcastFeed.channel, storedPodcastFeed.episodes, appUrl);
-  res.set('Content-Type', 'application/xml; charset=utf-8');
-  return res.send(xml);
+app.get('/api/podcast/rss.xml', (_req, res) => {
+  return res.status(501).json({
+    error: 'میزبانی فید عمومی در این نسخه فعال نیست؛ از فایل XML پیش‌نویس استفاده کنید و فایل‌های صوتی را جداگانه میزبانی کنید.',
+  });
 });
 
 /**
- * Update published episodes in the live RSS feed
+ * Shared in-memory RSS publishing is disabled to prevent cross-user data exposure.
  */
-app.post('/api/podcast/update-feed', (req, res) => {
-  try {
-    const { channel, episodes } = req.body;
-    if (channel) {
-      storedPodcastFeed.channel = { ...storedPodcastFeed.channel, ...channel };
-    }
-    if (Array.isArray(episodes)) {
-      storedPodcastFeed.episodes = episodes;
-    }
-    return res.json({ success: true, count: storedPodcastFeed.episodes.length });
-  } catch (e: any) {
-    return res.status(500).json({ error: e.message });
-  }
+app.post('/api/podcast/update-feed', (_req, res) => {
+  return res.status(410).json({
+    error: 'ذخیره فید عمومی مشترک و موقت غیرفعال شده است؛ از endpoint ساخت XML برای دریافت پیش‌نویس استفاده کنید.',
+  });
 });
 
 /**
  * Generate standalone RSS XML string for direct download
  */
-app.post('/api/podcast/generate-rss', (req, res) => {
+app.post('/api/podcast/generate-rss', rateLimit(30, 60_000), (req, res) => {
   try {
     const { channel, episodes } = req.body;
     const host = req.get('host') || 'localhost:3000';
