@@ -291,8 +291,14 @@ export default function App() {
   const handleSynthesizeAndPlay = async (episodeToSynthesize: PodcastEpisode | null = currentEpisode) => {
     if (!episodeToSynthesize) return;
 
-    // Stop existing audio
+    // Stop and clear previous audio so a failed render cannot leave stale playback attached to a new episode.
     stopAudioPlayback();
+    setMasterAudioBuffer(null);
+    setMp3Blob(null);
+    setWavBlob(null);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
 
     setIsSynthesizingAudio(true);
     const totalTurns = episodeToSynthesize.script.length;
