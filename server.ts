@@ -584,10 +584,11 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
     <itunes:author><![CDATA[${channel.author}]]></itunes:author>
     <description><![CDATA[${channel.description}]]></description>
     <itunes:summary><![CDATA[${channel.description}]]></itunes:summary>
+    ${channel.email ? `
     <itunes:owner>
       <itunes:name><![CDATA[${channel.author}]]></itunes:name>
       <itunes:email>${channel.email}</itunes:email>
-    </itunes:owner>
+    </itunes:owner>` : ''}
     <itunes:explicit>no</itunes:explicit>
     <itunes:category text="${channel.category || 'Technology'}" />
     <itunes:image href="${channel.coverImageUrl}" />
