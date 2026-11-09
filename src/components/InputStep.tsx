@@ -89,9 +89,9 @@ export const InputStep: React.FC<InputStepProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
+    <div className="w-full min-w-0 max-w-5xl mx-auto space-y-8 pb-16">
       {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-purple-950/40 via-slate-900/60 to-slate-900/90 border border-purple-500/20 p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-purple-950/40 via-slate-900/60 to-slate-900/90 border border-purple-500/20 p-5 sm:p-10 shadow-2xl backdrop-blur-xl">
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -124,7 +124,7 @@ export const InputStep: React.FC<InputStepProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Step 1: Text Input & Sample Pickers */}
-        <div className="bg-slate-900/80 rounded-3xl border border-slate-800 p-6 sm:p-8 space-y-4 shadow-xl">
+        <div className="bg-slate-900/80 rounded-2xl sm:rounded-3xl border border-slate-800 p-4 sm:p-8 space-y-4 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-bold">
@@ -161,7 +161,7 @@ export const InputStep: React.FC<InputStepProps> = ({
               className="w-full bg-slate-950/70 border border-slate-700/70 rounded-2xl p-4 text-slate-100 text-sm leading-relaxed placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-y"
               dir="rtl"
             />
-            <div className="flex items-center justify-between mt-2 px-1 text-xs text-slate-400">
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-2 px-1 text-xs text-slate-400">
               <span>تعداد واژگان: {wordCount.toLocaleString('fa-IR')} کلمه</span>
               <span>پیشنهاد: بین ۱۰۰ تا ۲۰۰۰ کلمه برای بهترین نتیجه</span>
             </div>
@@ -385,7 +385,7 @@ export const InputStep: React.FC<InputStepProps> = ({
               {/* Host 1 */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-slate-300">نام و صدای میزبان اول:</label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2">
                   <input
                     type="text"
                     value={host1Name}
