@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+/* Custom soundwave pulse animation */
+@keyframes wave-bounce {
+  0%, 100% { height: 15%; }
+  50% { height: 95%; }
+}
+
+.animate-soundwave {
+  animation: wave-bounce 1.2s ease-in-out infinite;
+}

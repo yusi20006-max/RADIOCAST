@@ -1,0 +1,6 @@
+{
+  "name": "رادیو کست | استودیوی هوش مصنوعی ساخت پادکست فارسی",
+  "description": "پلتفرم جامع تبدیل متن به پادکست فارسی با هوش مصنوعی، تنظیم لحن و سرعت صدا، موسیقی زمینه، افکت‌های صوتی و خروجی MP3",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

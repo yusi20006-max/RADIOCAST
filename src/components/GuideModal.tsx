@@ -1,0 +1,97 @@
+import React from 'react';
+import { X, Sparkles, Music, Gauge, Share2, Mic2, HelpCircle, CheckCircle2 } from 'lucide-react';
+
+interface GuideModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
+        <button
+          onClick={onClose}
+          className="absolute top-5 left-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <HelpCircle className="w-6 h-6 text-purple-400" />
+            <h3 className="text-xl font-black text-white">راهنمای ساخت پادکست رادیو کست</h3>
+          </div>
+          <p className="text-xs text-slate-400">
+            چگونه با هوش مصنوعی هر متن، خبر یا مقاله‌ای را به یک پادکست حرفه‌ای تبدیل کنیم؟
+          </p>
+        </div>
+
+        <div className="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+          {/* Step 1 */}
+          <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+              <span className="w-6 h-6 rounded-lg bg-purple-600/20 text-purple-400 flex items-center justify-center text-xs">
+                ۱
+              </span>
+              ورود متن و انتخاب قالب
+            </h4>
+            <p className="text-slate-400 text-xs">
+              هر نوع متنی اعم از مقاله‌های علمی، داستان‌ها، اخبار یا خلاصه‌های کتاب را می‌توانید وارد کنید. سپس از بین قالب‌های گفتگوی دونفره (شبیه به NotebookLM)، تک‌نفره، مصاحبه یا کپسول خلاصه یکی را انتخاب کنید.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+              <span className="w-6 h-6 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xs">
+                ۲
+              </span>
+              تنظیم لحن و سرعت صدا (همراه با لحن تطبیقی پاراگراف‌ها)
+            </h4>
+            <p className="text-slate-400 text-xs">
+              لحن کلی گفتار (شاد، جدی، دوستانه، داستانی یا طنزآمیز) و سرعت خوانش قابل تنظیم هستند. همچنین با فعال‌سازی <strong>«لحن تطبیقی پاراگراف به پاراگراف»</strong>، جملات پرسشی به صورت خودکار با لحن کنجکاوانه، تعجب‌ها با هیجان و شگفتی، و استنتاج‌ها با لحنی متفکرانه ادا می‌شوند. همچنین می‌توانید در ویرایشگر، لحن هر پاراگراف را به صورت جداگانه تغییر دهید.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+              <span className="w-6 h-6 rounded-lg bg-pink-600/20 text-pink-400 flex items-center justify-center text-xs">
+                ۳
+              </span>
+              موسیقی پس‌زمینه و افکت‌ها (Audio Ducking)
+            </h4>
+            <p className="text-slate-400 text-xs">
+              شما می‌توانید از انواع استایل‌های موسیقی (لوفای، امبینت، آکوستیک رادیویی، سینمایی یا سنتی تلفیقی ایرانی) استفاده کنید. سیستم به صورت خودکار قابلیت Ducking دارد؛ یعنی موقع صحبت گوینده، صدای موسیقی آرام می‌شود و در فواصل سکوت و اینترو بالا می‌آید.
+            </p>
+          </div>
+
+          {/* Step 4 */}
+          <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <h4 className="font-bold text-white flex items-center gap-2 text-sm">
+              <span className="w-6 h-6 rounded-lg bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xs">
+                ۴
+              </span>
+              دانلود MP3 و انتشار در پلتفرم‌ها
+            </h4>
+            <p className="text-slate-400 text-xs">
+              فایل نهایی به صورت مستقیم با فرمت استاندارد MP3 (۱۹۲kbps) قابل دانلود است. همچنین می‌توانید Show Notes، سرفصل‌های زمانی و متن کتبی را دریافت کرده یا مستقیماً در تلگرام، واتس‌اپ و شبکه‌های اجتماعی به اشتراک بگذارید.
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-2 text-center">
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all cursor-pointer"
+          >
+            متوجه شدم، بزن بریم استودیو!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
