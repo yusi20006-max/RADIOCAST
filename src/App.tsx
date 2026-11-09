@@ -288,7 +288,7 @@ export default function App() {
   };
 
   // Step 2 & 3: Master Synthesize & Mix Audio
-  const handleSynthesizeAndPlay = async (episodeToSynthesize: PodcastEpisode | null = episodeToSynthesize) => {
+  const handleSynthesizeAndPlay = async (episodeToSynthesize: PodcastEpisode | null = currentEpisode) => {
     if (!episodeToSynthesize) return;
 
     // Stop existing audio
