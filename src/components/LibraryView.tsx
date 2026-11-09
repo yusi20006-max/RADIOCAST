@@ -81,8 +81,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 className="group relative rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-purple-500/50 p-5 transition-all shadow-xl hover:shadow-2xl flex flex-col justify-between gap-4"
               >
                 {/* Top: Badges & Delete */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold">
                       {formatInfo?.labelFa.split(' ')[0] || 'پادکست'}
                     </span>
