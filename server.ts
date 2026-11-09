@@ -591,7 +591,6 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
     <itunes:explicit>no</itunes:explicit>
     <itunes:category text="${channel.category || 'Technology'}" />
     <itunes:image href="${channel.coverImageUrl}" />
-    <atom:link href="${feedUrl}" rel="self" type="application/rss+xml"/>
     ${itemsXml}
   </channel>
 </rss>`;
