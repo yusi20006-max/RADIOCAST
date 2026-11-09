@@ -383,7 +383,7 @@ export const CoverArtGeneratorModal: React.FC<CoverArtGeneratorModalProps> = ({
 
         {/* Modal Header */}
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Palette className="w-6 h-6 text-purple-400" />
             <h3 className="text-xl font-black text-white">
               طراحی و تولید خودکار کاور آرت پادکست (Cover Art Studio)
