@@ -157,9 +157,9 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="w-full min-w-0 max-w-5xl mx-auto space-y-8 pb-20">
       {/* Back button and Episode Header Card */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={onBackToInput}
           className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl transition-all"
