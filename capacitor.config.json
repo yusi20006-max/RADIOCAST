@@ -1,0 +1,6 @@
+{
+  "appId": "com.radiocast.studio",
+  "appName": "RadioCast",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
