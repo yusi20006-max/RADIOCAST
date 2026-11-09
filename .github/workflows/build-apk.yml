@@ -3,6 +3,8 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -16,7 +18,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         cache: 'npm'
 
     - name: Set up Java
@@ -27,15 +29,14 @@ jobs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
+      with:
+        packages: platform-tools
 
     - name: Install dependencies
-      run: npm install --legacy-peer-deps
-
-    - name: Install Capacitor packages explicitly
-      run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest --save --legacy-peer-deps
+      run: npm ci --legacy-peer-deps
 
     - name: Build Web App
-      run: node node_modules/.bin/vite build
+      run: npm run build
 
     - name: Create Capacitor Config
       run: |
@@ -51,7 +52,7 @@ jobs:
     - name: Add Android Platform & Sync
       run: |
         npx cap telemetry off || true
-        npx cap add android --no-interactive
+        npx cap add android
         npx cap sync android
 
     - name: Build Android APK
