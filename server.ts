@@ -1,4 +1,7 @@
 import express from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
@@ -9,6 +12,103 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+type RateLimitBucket = { count: number; resetAt: number };
+const rateLimitBuckets = new Map<string, RateLimitBucket>();
+
+function rateLimit(maxRequests: number, windowMs: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const now = Date.now();
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    let bucket = rateLimitBuckets.get(key);
+
+    if (!bucket || bucket.resetAt <= now) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      rateLimitBuckets.set(key, bucket);
+    }
+
+    if (bucket.count >= maxRequests) {
+      res.setHeader('Retry-After', String(Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))));
+      return res.status(429).json({ error: 'تعداد درخواست‌ها بیش از حد مجاز است؛ کمی بعد دوباره تلاش کنید.' });
+    }
+
+    bucket.count += 1;
+
+    if (rateLimitBuckets.size > 5000) {
+      for (const [entryKey, entry] of rateLimitBuckets) {
+        if (entry.resetAt <= now) rateLimitBuckets.delete(entryKey);
+      }
+    }
+
+    return next();
+  };
+}
+
+function isBlockedIpAddress(address: string): boolean {
+  const normalized = address.toLowerCase().split('%')[0];
+
+  if (isIP(normalized) === 4) {
+    const parts = normalized.split('.').map(Number);
+    const [a, b, c] = parts;
+    return (
+      a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && (b === 168 || b === 0 || (b === 2 && c === 0))) ||
+      (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) ||
+      (a === 203 && b === 0 && c === 113) ||
+      (a === 100 && b >= 64 && b <= 127)
+    );
+  }
+
+  if (isIP(normalized) === 6) {
+    if (normalized === '::' || normalized === '::1') return true;
+    if (/^(fc|fd|fe[89ab])/i.test(normalized)) return true;
+    if (normalized.startsWith('::ffff:')) {
+      const mapped = normalized.slice(7);
+      if (isIP(mapped) === 4) return isBlockedIpAddress(mapped);
+    }
+    return false;
+  }
+
+  return true;
+}
+
+async function getSafeExternalBaseUrl(rawUrl: string): Promise<string> {
+  const parsed = new URL(rawUrl);
+  if (parsed.username || parsed.password) {
+    throw new Error('آدرس API نباید شامل نام کاربری یا گذرواژه باشد.');
+  }
+
+  const hostname = parsed.hostname.replace(/^\\[|\\]$/g, '').toLowerCase().replace(/\\.$/, '');
+  const isLocalDevelopment =
+    process.env.NODE_ENV !== 'production' &&
+    parsed.protocol === 'http:' &&
+    ['localhost', '127.0.0.1', '::1'].includes(hostname);
+
+  if (parsed.protocol !== 'https:' && !isLocalDevelopment) {
+    throw new Error('برای سرویس خارجی فقط آدرس HTTPS مجاز است.');
+  }
+
+  if (hostname.endsWith('.local') || hostname.endsWith('.internal') || hostname === 'metadata.google.internal') {
+    throw new Error('آدرس‌های شبکه داخلی برای سرویس خارجی مجاز نیستند.');
+  }
+
+  if (!isLocalDevelopment) {
+    if (isIP(hostname)) {
+      if (isBlockedIpAddress(hostname)) {
+        throw new Error('آدرس‌های IP خصوصی یا رزروشده مجاز نیستند.');
+      }
+    } else {
+      const resolved = await lookup(hostname, { all: true, verbatim: true });
+      if (!resolved.length || resolved.some((entry) => isBlockedIpAddress(entry.address))) {
+        throw new Error('مقصد API به یک آدرس شبکه داخلی یا رزروشده اشاره می‌کند.');
+      }
+    }
+  }
+
+  return parsed.toString().replace(/\\/+$/, '');
+}
 
 app.use(express.json({ limit: '15mb' }));
 
@@ -25,7 +125,7 @@ const ai = new GoogleGenAI({
 /**
  * Health check endpoint for external third-party LLM APIs
  */
-app.post('/api/external-provider/health-check', async (req, res) => {
+app.post('/api/external-provider/health-check', rateLimit(10, 60_000), async (req, res) => {
   const startTime = Date.now();
   try {
     const { baseUrl, apiKey, model = 'gpt-4o-mini' } = req.body;
@@ -37,7 +137,7 @@ app.post('/api/external-provider/health-check', async (req, res) => {
       return res.status(400).json({ healthy: false, error: 'کلید API (API Key) وارد نشده است.' });
     }
 
-    const cleanBaseUrl = baseUrl.trim().replace(/\/+$/, '');
+    const cleanBaseUrl = await getSafeExternalBaseUrl(baseUrl);
 
     // Test with a lightweight ping to /chat/completions
     const response = await fetch(`${cleanBaseUrl}/chat/completions`, {
@@ -94,7 +194,7 @@ app.post('/api/external-provider/health-check', async (req, res) => {
 /**
  * Endpoint to generate structured Persian podcast script from raw text
  */
-app.post('/api/podcast/generate-script', async (req, res) => {
+app.post('/api/podcast/generate-script', rateLimit(6, 60_000), async (req, res) => {
   try {
     const {
       sourceText,
@@ -182,7 +282,7 @@ ${sourceText.slice(0, 8000)}
     // Check if user requested an external provider (OpenAI, OpenRouter, Groq, etc.)
     if (aiProvider === 'external' && externalConfig?.apiKey && externalConfig?.baseUrl) {
       try {
-        const cleanBaseUrl = externalConfig.baseUrl.trim().replace(/\/+$/, '');
+        const cleanBaseUrl = await getSafeExternalBaseUrl(externalConfig.baseUrl);
         const systemInstruction = 'You are an award-winning Persian podcast director and audio scriptwriter. Output strictly valid JSON matching the podcast screenplay schema with fields: title, episodeSummary, genre, suggestedBgm, tags, chapters, script.';
 
         const extResponse = await fetch(`${cleanBaseUrl}/chat/completions`, {
@@ -301,7 +401,7 @@ ${sourceText.slice(0, 8000)}
 /**
  * Endpoint to synthesize high-quality audio using gemini-3.8-flash-tts / gemini-3.8-flash-lite-tts
  */
-app.post('/api/podcast/synthesize-turn', async (req, res) => {
+app.post('/api/podcast/synthesize-turn', rateLimit(90, 60_000), async (req, res) => {
   try {
     const {
       text,
@@ -392,7 +492,7 @@ app.post('/api/podcast/synthesize-turn', async (req, res) => {
 /**
  * Endpoint to refine a specific dialogue turn (e.g. make funnier, shorter, deeper)
  */
-app.post('/api/podcast/refine-turn', async (req, res) => {
+app.post('/api/podcast/refine-turn', rateLimit(20, 60_000), async (req, res) => {
   try {
     const { currentText, instruction, speakerName, tone } = req.body;
 
