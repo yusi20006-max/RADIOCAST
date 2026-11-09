@@ -343,6 +343,9 @@ export default function App() {
           turn.audioBase64 = base64;
         }
 
+        if (!base64) {
+          throw new Error('دادهٔ صوتی این بخش در دسترس نیست؛ ساخت خروجی متوقف شد.');
+        }
         const audioBuf = await decodeAudioBase64(base64, ctx);
 
         voiceBuffers.push({ buffer: audioBuf, sfxCue: turn.sfxCue });
