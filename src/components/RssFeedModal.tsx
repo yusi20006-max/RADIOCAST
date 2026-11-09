@@ -87,7 +87,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
         }),
       });
       if (res.ok) {
-        onToast(`فید RSS زنده با ${savedEpisodes.length} اپیزود به‌روزرسانی شد.`);
+        onToast('اطلاعات فید در حافظه موقت سرور ثبت شد؛ فقط اپیزودهای دارای audioUrl عمومی در XML قرار می‌گیرند.');
         loadGeneratedXml();
       }
     } catch (e) {
@@ -303,7 +303,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
                 <ol className="list-decimal list-inside space-y-1 text-slate-400">
                   <li>وارد سایت <a href="https://castbox.fm" target="_blank" rel="noreferrer" className="text-amber-400 underline">Castbox Creator Studio</a> شوید.</li>
                   <li>روی دکمه «Claim Ownership» یا «Add Show» کلیک کنید.</li>
-                  <li>آدرس فید بالا را در کادر «RSS Feed URL» چسبانده و Submit کنید.</li>
+                  <li>تا زمانی که فایل صوتی عمومی و پایدار برای اپیزودها تعریف نشده، این فید برای انتشار نهایی آماده نیست.</li>
                   <li>پس از ثبت و تأیید فید توسط پادگیر، ممکن است نمایش عمومی آن زمان ببرد؛ در حال حاضر این برنامه فایل صوتی را میزبانی نمی‌کند.</li>
                 </ol>
               </>
