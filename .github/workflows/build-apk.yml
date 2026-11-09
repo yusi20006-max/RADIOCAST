@@ -25,11 +25,22 @@ jobs:
     - name: Build Web App
       run: node node_modules/.bin/vite build
 
-    - name: Initialize Capacitor & Add Android
+    - name: Install Capacitor CLI & Core
+      run: npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
+
+    - name: Create Capacitor Config
       run: |
-        npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
-        npx cap init Radiocast com.radiocast.app --web-dir dist --yes
-        npx cap add android
+        cat << 'EOF' > capacitor.config.json
+        {
+          "appId": "com.radiocast.app",
+          "appName": "Radiocast",
+          "webDir": "dist",
+          "bundledWebRuntime": false
+        }
+        EOF
+
+    - name: Add Android Platform
+      run: npx cap add android
 
     - name: Update Capacitor Android Assets
       run: npx cap sync android
