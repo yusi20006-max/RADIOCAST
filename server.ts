@@ -200,7 +200,7 @@ app.post('/api/podcast/generate-script', rateLimit(6, 60_000), async (req, res) 
       sourceText,
       format = 'dual', // 'dual' | 'solo' | 'interview' | 'briefing'
       tone = 'friendly', // 'friendly' | 'serious' | 'energetic' | 'dramatic' | 'humorous'
-      speed = 'normal', // 'slow' | 'normal' | 'fast' | 'veryFast' | 'veryFast'
+      speed = 'normal', // 'slow' | 'normal' | 'fast' | 'veryFast'
       host1Name = 'نیما',
       host2Name = 'سارا',
       durationTarget = 'medium', // 'short' | 'medium' | 'detailed'
