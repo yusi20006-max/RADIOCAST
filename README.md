@@ -102,7 +102,7 @@ RADIOCAST/
 
 2. وابستگی‌ها را نصب کنید:
    ```bash
-   npm ci
+   npm ci --legacy-peer-deps
    ```
 
 3. متغیرهای محیطی را تنظیم کنید:
