@@ -339,9 +339,9 @@ export const ShareAndExportModal: React.FC<ShareAndExportModalProps> = ({
                   <div className="space-y-0.5">
                     <span className="text-xs font-bold text-amber-200 group-hover:text-white flex items-center gap-1.5">
                       <Rss className="w-3.5 h-3.5 text-amber-400" />
-                      فید رسمی پادکست (RSS 2.0)
+                      پیش‌نویس فایل RSS 2.0
                     </span>
-                    <p className="text-[10px] text-slate-400">لینک اختصاصی برای ثبت در Castbox و Spotify</p>
+                    <p className="text-[10px] text-slate-400">دریافت XML؛ انتشار به میزبان عمومی و فایل صوتی نیاز دارد</p>
                   </div>
                   <ExternalLink className="w-4 h-4 text-amber-400 shrink-0" />
                 </button>
