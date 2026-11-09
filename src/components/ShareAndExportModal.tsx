@@ -144,8 +144,8 @@ export const ShareAndExportModal: React.FC<ShareAndExportModalProps> = ({
   const mp3SizeMb = mp3Blob ? (mp3Blob.size / (1024 * 1024)).toFixed(2) : '1.5';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
