@@ -389,7 +389,7 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
                     : 'bg-slate-900/40 border-slate-800/80 hover:bg-slate-900/70 hover:border-slate-700 opacity-70 hover:opacity-100'
                 }`}
               >
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-xs font-bold px-2 py-0.5 rounded-md ${
