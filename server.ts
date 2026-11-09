@@ -178,7 +178,7 @@ app.post('/api/external-provider/health-check', rateLimit(10, 60_000), async (re
     return res.json({
       healthy: true,
       latencyMs,
-      message: 'اتصال به سرویس با موفقیت برقرار شد و پاسخ آزمایشی در کمتر از ۱ ثانیه دریافت گردید.',
+      message: 'اتصال به سرویس برقرار شد و پاسخ آزمایشی دریافت گردید.',
       model: model || data.model || 'سرویس متصل',
     });
   } catch (error: any) {
@@ -597,7 +597,7 @@ function buildRssXml(channel: any, episodes: any[], appUrl: string): string {
 }
 
 /**
- * Public RSS Feed endpoint for Apple Podcasts, Spotify, Castbox, etc.
+ * Public RSS hosting is not enabled; this route intentionally returns 501.
  */
 app.get('/api/podcast/rss.xml', (_req, res) => {
   return res.status(501).json({
@@ -606,7 +606,7 @@ app.get('/api/podcast/rss.xml', (_req, res) => {
 });
 
 /**
- * Update published episodes in the live RSS feed
+ * Shared in-memory RSS publishing is disabled to prevent cross-user data exposure.
  */
 app.post('/api/podcast/update-feed', (_req, res) => {
   return res.status(410).json({
