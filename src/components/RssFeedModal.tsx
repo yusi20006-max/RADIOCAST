@@ -100,7 +100,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(feedUrl);
     setCopiedUrl(true);
-    onToast('آدرس معتبر فید RSS در کلیپ‌بورد کپی شد.');
+    onToast('نشانی endpoint فید کپی شد؛ پیش از انتشار، وجود فایل‌های صوتی عمومی را بررسی کنید.');
     setTimeout(() => setCopiedUrl(false), 2500);
   };
 
@@ -126,8 +126,8 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-4xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -141,11 +141,11 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
           <div className="flex items-center gap-2">
             <Rss className="w-6 h-6 text-amber-400" />
             <h3 className="text-xl font-black text-white">
-              تولید خودکار فید RSS و انتشار در پادگیرها
+              ساخت و دریافت فایل فید RSS
             </h3>
           </div>
           <p className="text-xs text-slate-400">
-            فید استاندارد Podcast RSS 2.0 (سازگار با Apple Podcasts، Castbox، Spotify و شنوتو) برای اشتراک عمومی اپیزودهای شما.
+            فایل XML با ساختار RSS 2.0 ساخته می‌شود. برای انتشار واقعی، هر اپیزود باید نشانی عمومی و مستقیم فایل صوتی داشته باشد و فایل صوتی نیز روی میزبان پایدار قرار گرفته باشد.
           </p>
         </div>
 
@@ -154,7 +154,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <h4 className="text-xs sm:text-sm font-bold text-white">آدرس فید زنده پادکست شما (RSS Feed URL):</h4>
+              <h4 className="text-xs sm:text-sm font-bold text-white">نشانی فید RSS روی سرور فعلی:</h4>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold font-mono">
               RSS 2.0 + iTunes Tags
@@ -195,7 +195,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
               className="text-amber-400 hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer"
             >
               {isSyncing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-              <span>همگام‌سازی مجدد اپیزودها با فید زنده</span>
+              <span>همگام‌سازی مجدد اپیزودها با فید روی سرور</span>
             </button>
           </div>
         </div>
@@ -304,7 +304,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
                   <li>وارد سایت <a href="https://castbox.fm" target="_blank" rel="noreferrer" className="text-amber-400 underline">Castbox Creator Studio</a> شوید.</li>
                   <li>روی دکمه «Claim Ownership» یا «Add Show» کلیک کنید.</li>
                   <li>آدرس فید بالا را در کادر «RSS Feed URL» چسبانده و Submit کنید.</li>
-                  <li>پادکست شما بلافاصله در اپلیکیشن کست‌باکس برای همه قابل جستجو و شنیدن خواهد بود!</li>
+                  <li>پس از ثبت و تأیید فید توسط پادگیر، ممکن است نمایش عمومی آن زمان ببرد؛ در حال حاضر این برنامه فایل صوتی را میزبانی نمی‌کند.</li>
                 </ol>
               </>
             )}
