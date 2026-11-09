@@ -54,14 +54,14 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in" dir="rtl">
       <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/40">
+        <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-slate-800 bg-slate-950/40">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-purple-600/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
               <Download className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white">دریافت خروجی، فایل ZIP و APK اپلیکیشن</h3>
-              <p className="text-xs text-slate-400">سورس‌کد کامل پروژه، راهنمای ساخت فایل نصبی APK اندروید و گیت‌هاب</p>
+              <p className="text-xs text-slate-400">دریافت بستهٔ ZIP موجود، راهنمای ساخت APK و دسترسی به مخزن GitHub</p>
             </div>
           </div>
           <button
@@ -73,7 +73,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
         </div>
 
         {/* Tab selection */}
-        <div className="flex items-center gap-2 p-3 bg-slate-950/70 border-b border-slate-800/80">
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-950/70 border-b border-slate-800/80">
           <button
             onClick={() => setActiveTab('zip')}
             className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -83,7 +83,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
             }`}
           >
             <FolderArchive className="w-4 h-4" />
-            <span>دانلود سورس کامل (ZIP)</span>
+            <span>دانلود بستهٔ ZIP</span>
           </button>
 
           <button
@@ -121,10 +121,10 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   <div>
                     <h4 className="text-sm font-extrabold text-white flex items-center gap-2">
                       <FolderArchive className="w-4 h-4 text-purple-400" />
-                      بسته زیپ جامع پروژه آماده دانلود است
+                      فایل ZIP ذخیره‌شده در مخزن آماده دریافت است
                     </h4>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                      شامل سورس پروژه و فایل‌های لازم برای بررسی و اجرای محلی؛ پیش از انتشار، نسخهٔ بسته را با آخرین تغییرات مخزن تطبیق دهید.
+                      این فایل یک snapshot از سورس است و ممکن است آخرین تغییرات مخزن را نداشته باشد. برای دریافت نسخهٔ به‌روز، مخزن GitHub را باز کنید.
                     </p>
                   </div>
                   <span className="text-[11px] px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 font-mono font-bold shrink-0">
@@ -138,7 +138,7 @@ export const ExportAppModal: React.FC<ExportAppModalProps> = ({
                   className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm shadow-xl shadow-purple-600/40 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Download className="w-5 h-5 animate-bounce" />
-                  <span>دانلود آنی فایل radiocast-podcast-studio.zip</span>
+                  <span>دریافت فایل radiocast-podcast-studio.zip</span>
                 </a>
               </div>
 
