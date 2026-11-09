@@ -112,6 +112,9 @@ app.post('/api/podcast/generate-script', async (req, res) => {
     if (!sourceText || typeof sourceText !== 'string' || !sourceText.trim()) {
       return res.status(400).json({ error: 'لطفاً متن ورودی را وارد نمایید.' });
     }
+    if (sourceText.length > 8000) {
+      return res.status(400).json({ error: 'متن ورودی بیش از سقف ۸۰۰۰ نویسه است؛ لطفاً آن را کوتاه‌تر کنید.' });
+    }
 
     const toneDescriptions: Record<string, string> = {
       friendly: 'دوستانه، صمیمی، محاوره‌ای و گرم (مانند دو دوست نزدیک که در کافه گپ می‌زنند)',
