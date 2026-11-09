@@ -27,11 +27,11 @@ export const Header: React.FC<HeaderProps> = ({
   isGeneratingAudio,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-4 lg:px-8 py-3.5 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-3 sm:px-4 lg:px-8 py-3.5 transition-all">
+      <div className="max-w-7xl w-full min-w-0 mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {/* Brand & Live status */}
-        <div className="flex items-center gap-3.5">
-          <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 shadow-lg shadow-purple-900/30 ring-1 ring-purple-400/30">
+        <div className="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+          <div className="relative flex shrink-0 items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 shadow-lg shadow-purple-900/30 ring-1 ring-purple-400/30">
             <Radio className="w-6 h-6 text-white animate-pulse" />
             <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-950 flex items-center justify-center">
               <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation Tabs & Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex w-full sm:w-auto flex-wrap items-center justify-start sm:justify-end gap-2">
           <button
             onClick={() => setCurrentTab('studio')}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
