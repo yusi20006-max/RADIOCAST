@@ -105,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onOpenRssModal}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-white transition-all cursor-pointer shadow-sm shadow-amber-950/40"
-            title="فید RSS پادکست و انتشار در پادگیرها (Apple, Spotify, Castbox)"
+            title="ساخت و دریافت پیش‌نویس فایل RSS"
           >
             <Rss className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">فید RSS</span>
