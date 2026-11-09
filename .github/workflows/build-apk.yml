@@ -35,6 +35,9 @@ jobs:
     - name: Install dependencies
       run: npm ci --legacy-peer-deps
 
+    - name: TypeScript check
+      run: npm run lint
+
     - name: Build Web App
       run: npm run build
 
