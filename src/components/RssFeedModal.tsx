@@ -52,7 +52,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
     loadGeneratedXml();
   }, [isOpen, channel, savedEpisodes]);
 
-  const loadGeneratedXml = async () => {
+  const loadGeneratedXml = async (): Promise<boolean> => {
     try {
       const res = await fetch('/api/podcast/generate-rss', {
         method: 'POST',
@@ -62,20 +62,22 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
           episodes: savedEpisodes,
         }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setXmlContent(data.xml || '');
-      }
+      if (!res.ok) throw new Error('ساخت پیش‌نویس RSS ناموفق بود.');
+      const data = await res.json();
+      setXmlContent(data.xml || '');
+      return true;
     } catch (e) {
       console.error('Failed to generate RSS:', e);
+      setXmlContent('');
+      return false;
     }
   };
 
   const handleSyncFeed = async () => {
     try {
       setIsSyncing(true);
-      await loadGeneratedXml();
-      onToast('پیش‌نویس XML با اطلاعات فعلی بازسازی شد؛ این کار فید عمومی میزبانی نمی‌کند.');
+      const generated = await loadGeneratedXml();
+      onToast(generated ? 'پیش‌نویس XML با اطلاعات فعلی بازسازی شد؛ این کار فید عمومی میزبانی نمی‌کند.' : 'ساخت پیش‌نویس XML ناموفق بود؛ اتصال سرور را بررسی کنید.');
     } finally {
       setIsSyncing(false);
     }
@@ -83,6 +85,10 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
 
 
   const handleCopyXml = () => {
+    if (!xmlContent) {
+      onToast('ابتدا پیش‌نویس XML را تولید کنید.');
+      return;
+    }
     navigator.clipboard.writeText(xmlContent);
     setCopiedXml(true);
     onToast('کد XML فید کپی شد.');
@@ -90,6 +96,10 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
   };
 
   const handleDownloadXml = () => {
+    if (!xmlContent) {
+      onToast('ابتدا پیش‌نویس XML را تولید کنید.');
+      return;
+    }
     const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -98,6 +108,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     onToast('فایل podcast-feed.xml دانلود شد.');
   };
 
