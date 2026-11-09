@@ -10,8 +10,8 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl min-w-0 my-auto bg-slate-900 border border-purple-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-5 left-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
@@ -78,7 +78,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({ isOpen, onClose }) => {
               دانلود MP3 و انتشار در پلتفرم‌ها
             </h4>
             <p className="text-slate-400 text-xs">
-              فایل نهایی به صورت مستقیم با فرمت استاندارد MP3 (۱۹۲kbps) قابل دانلود است. همچنین می‌توانید Show Notes، سرفصل‌های زمانی و متن کتبی را دریافت کرده یا مستقیماً در تلگرام، واتس‌اپ و شبکه‌های اجتماعی به اشتراک بگذارید.
+              پس از موفقیت تولید صدا و میکس، فایل MP3 با نرخ ۱۹۲ کیلوبیت‌برثانیه قابل دانلود است. همچنین می‌توانید متن دیالوگ‌ها و یادداشت‌های برنامه را دریافت یا لینک برنامه را به اشتراک بگذارید.
             </p>
           </div>
         </div>
