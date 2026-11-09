@@ -80,7 +80,7 @@ async function getSafeExternalBaseUrl(rawUrl: string): Promise<string> {
     throw new Error('آدرس API نباید شامل نام کاربری یا گذرواژه باشد.');
   }
 
-  const hostname = parsed.hostname.replace(/^\\[|\\]$/g, '').toLowerCase().replace(/\\.$/, '');
+  const hostname = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase().replace(/\.$/, '');
   const isLocalDevelopment =
     process.env.NODE_ENV !== 'production' &&
     parsed.protocol === 'http:' &&
@@ -107,7 +107,7 @@ async function getSafeExternalBaseUrl(rawUrl: string): Promise<string> {
     }
   }
 
-  return parsed.toString().replace(/\\/+$/, '');
+  return parsed.toString().replace(/\/+$/, '');
 }
 
 app.use(express.json({ limit: '15mb' }));
