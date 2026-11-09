@@ -169,7 +169,7 @@ export const InputStep: React.FC<InputStepProps> = ({
         </div>
 
         {/* Step 2: Format & Podcast Style */}
-        <div className="bg-slate-900/80 rounded-3xl border border-slate-800 p-6 sm:p-8 space-y-6 shadow-xl">
+        <div className="bg-slate-900/80 rounded-2xl sm:rounded-3xl border border-slate-800 p-4 sm:p-8 space-y-6 shadow-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-bold">
               ۲
@@ -214,7 +214,7 @@ export const InputStep: React.FC<InputStepProps> = ({
         </div>
 
         {/* Step 3: Speed & Tone Customization (Requested Feature) */}
-        <div className="bg-slate-900/80 rounded-3xl border border-slate-800 p-6 sm:p-8 space-y-6 shadow-xl">
+        <div className="bg-slate-900/80 rounded-2xl sm:rounded-3xl border border-slate-800 p-4 sm:p-8 space-y-6 shadow-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-bold">
               ۳
@@ -324,7 +324,7 @@ export const InputStep: React.FC<InputStepProps> = ({
         </div>
 
         {/* Step 4: Background Music & Audio Cues */}
-        <div className="bg-slate-900/80 rounded-3xl border border-slate-800 p-6 sm:p-8 space-y-6 shadow-xl">
+        <div className="bg-slate-900/80 rounded-2xl sm:rounded-3xl border border-slate-800 p-4 sm:p-8 space-y-6 shadow-xl">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-bold">
               ۴
@@ -411,7 +411,7 @@ export const InputStep: React.FC<InputStepProps> = ({
               {selectedFormat !== 'solo' && (
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-slate-300">نام و صدای میزبان دوم / کارشناس:</label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2">
                     <input
                       type="text"
                       value={host2Name}
