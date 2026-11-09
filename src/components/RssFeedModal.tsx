@@ -27,7 +27,7 @@ const DEFAULT_CHANNEL: PodcastChannelInfo = {
   title: 'رادیو کست | پادکست‌های هوش مصنوعی',
   description: 'پادکست‌های جذاب و شنیدنی فارسی با تحلیل‌ها، داستان‌ها و گفتگوهای عمیق پیرامون تکنولوژی و فرهنگ.',
   author: 'تیم پادکست رادیو کست',
-  email: 'podcast@radiocast.studio',
+  email: '',
   category: 'Technology',
   website: typeof window !== 'undefined' ? window.location.origin : 'https://radiocast.studio',
   language: 'fa',
@@ -145,7 +145,7 @@ export const RssFeedModal: React.FC<RssFeedModalProps> = ({
             </h3>
           </div>
           <p className="text-xs text-slate-400">
-            فایل XML با ساختار RSS 2.0 ساخته می‌شود. برای انتشار واقعی، هر اپیزود باید نشانی عمومی و مستقیم فایل صوتی داشته باشد و فایل صوتی نیز روی میزبان پایدار قرار گرفته باشد.
+            این ابزار فعلاً فایل XML پیش‌نویس می‌سازد. endpoint زنده بین بازدیدکنندگان سرور مشترک است و اطلاعات آن فقط در حافظه موقت می‌ماند؛ برای انتشار واقعی به میزبانی پایدار و مستقل فایل‌های صوتی نیاز دارید.
           </p>
         </div>
 
