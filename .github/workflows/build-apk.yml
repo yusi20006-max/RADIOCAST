@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Set up Java JDK
@@ -39,18 +39,17 @@ jobs:
         run: npm run build
 
       - name: Sync Capacitor Android
-        run: |
-          npx cap sync android || echo "Capacitor android platform check"
+        run: npx cap sync android
 
       - name: Build Debug APK with Gradle
         run: |
-          if [ -d "android" ]; then
-            cd android
-            chmod +x gradlew
-            ./gradlew assembleDebug --stacktrace
-          else
-            echo "پوشه android هنوز اضافه نشده است. لطفاً npx cap add android را اجرا کنید."
+          if [ ! -d "android" ]; then
+            echo "Android platform directory is missing after Capacitor sync."
+            exit 1
           fi
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         if: success()
@@ -58,4 +57,4 @@ jobs:
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+          if-no-files-found: error
