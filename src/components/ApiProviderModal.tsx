@@ -98,6 +98,10 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
       setHealthResult({ healthy: false, message: 'قبل از ذخیره، Base URL، کلید API و شناسه مدل را کامل کنید.' });
       return;
     }
+    if (localConfig.ttsProvider === 'google-cloud' && !localConfig.googleTtsApiKey?.trim()) {
+      setHealthResult({ healthy: false, message: 'برای Google Cloud TTS باید کلید API این سرویس را جداگانه وارد کنید.' });
+      return;
+    }
     const config = { ...localConfig, enabled: true };
     onSaveExternalConfig(config);
     onChangeProvider('external');
@@ -175,6 +179,54 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
             <input id="ai-model" value={localConfig.model} onChange={(e) => setLocalConfig({ ...localConfig, model: e.target.value, lastHealthCheck: undefined })}
               placeholder="مثلاً gpt-4o-mini" className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono outline-none focus:border-indigo-500" dir="ltr" />
           </div>
+        </section>
+
+        <section className="rounded-2xl border border-emerald-500/20 bg-slate-950/50 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-bold text-white">
+            <Activity className="w-4 h-4 text-emerald-400" />
+            سرویس مستقل تولید گفتار (TTS)
+          </div>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            موتور تولید متن و موتور گفتار جدا هستند. برای استفاده از Gemini در تولید متن، می‌توانید Google Cloud TTS را برای ساخت فایل صوتی انتخاب کنید.
+          </p>
+          <div className="space-y-1">
+            <label htmlFor="tts-provider" className="text-xs font-semibold text-slate-300">ارائه‌دهنده گفتار</label>
+            <select id="tts-provider" value={localConfig.ttsProvider || 'openai-compatible'}
+              onChange={(e) => setLocalConfig({ ...localConfig, ttsProvider: e.target.value as 'openai-compatible' | 'google-cloud' })}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white">
+              <option value="openai-compatible">OpenAI-compatible TTS</option>
+              <option value="google-cloud">Google Cloud Text-to-Speech</option>
+            </select>
+          </div>
+          {localConfig.ttsProvider === 'google-cloud' && (
+            <>
+              <div className="space-y-1">
+                <label htmlFor="google-tts-key" className="text-xs font-semibold text-slate-300">Google Cloud TTS API Key</label>
+                <input id="google-tts-key" type="password" autoComplete="new-password"
+                  value={localConfig.googleTtsApiKey || ''}
+                  onChange={(e) => setLocalConfig({ ...localConfig, googleTtsApiKey: e.target.value })}
+                  placeholder="کلید API پروژه Google Cloud"
+                  className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label htmlFor="google-tts-language" className="text-xs font-semibold text-slate-300">کد زبان</label>
+                  <input id="google-tts-language" value={localConfig.googleTtsLanguageCode || 'fa-IR'}
+                    onChange={(e) => setLocalConfig({ ...localConfig, googleTtsLanguageCode: e.target.value })}
+                    className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="google-tts-voice" className="text-xs font-semibold text-slate-300">نام صدا (Voice name)</label>
+                  <input id="google-tts-voice" value={localConfig.googleTtsVoice || 'fa-IR-Standard-A'}
+                    onChange={(e) => setLocalConfig({ ...localConfig, googleTtsVoice: e.target.value })}
+                    className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Base URL ثابت: https://texttospeech.googleapis.com/v1/ — مسیر text:synthesize به‌صورت خودکار استفاده می‌شود. خروجی MP3 است. کلید این سرویس مستقل از کلید Gemini است.
+              </p>
+            </>
+          )}
         </section>
 
         <div className="rounded-xl bg-slate-950 border border-slate-800 p-3 text-xs text-slate-400 leading-relaxed">
