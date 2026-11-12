@@ -336,16 +336,16 @@ export default function App() {
           base64 = arrayBufferToBase64(audioData);
         }
 
-        // Persist every completed speech segment. Retries skip cached segments.
+        // Decode and validate the returned file before marking this turn complete.
+        const audioBuf = await decodeAudioBase64(base64, ctx);
+
+        // Persist every successfully decoded speech segment. Retries skip cached segments.
         const updatedScript = workingEpisode.script.map((item) =>
           item.id === turn.id ? { ...item, audioBase64: base64 } : item
         );
         workingEpisode = { ...workingEpisode, script: updatedScript, projectStatus: 'audio-in-progress' };
         setCurrentEpisode(workingEpisode);
         await saveProject(workingEpisode);
-
-        // Never substitute synthetic tones for speech: fail clearly if real TTS is unavailable.
-        const audioBuf = await decodeAudioBase64(base64, ctx);
 
         voiceBuffers.push({ buffer: audioBuf, sfxCue: turn.sfxCue });
         setSynthesizingProgress({
