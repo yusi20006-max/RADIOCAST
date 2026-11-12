@@ -8,6 +8,7 @@ import {
   MessageSquareText,
   Zap,
   Volume2,
+  Play,
   Gauge,
   Sliders,
   Music,
@@ -34,6 +35,8 @@ interface InputStepProps {
     dynamicToneEnabled: boolean;
   }) => void;
   isGenerating: boolean;
+  scriptProgress: { percent: number; message: string };
+  onPreviewBgm: (style: BgmStyle) => void;
   onOpenApiModal: () => void;
   provider: AiProviderType;
   externalProviderName: string;
@@ -42,6 +45,8 @@ interface InputStepProps {
 export const InputStep: React.FC<InputStepProps> = ({
   onGenerate,
   isGenerating,
+  scriptProgress,
+  onPreviewBgm,
   onOpenApiModal,
   provider,
   externalProviderName,
@@ -115,7 +120,7 @@ export const InputStep: React.FC<InputStepProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 hover:bg-purple-900/50 border border-purple-500/40 text-purple-200 text-xs font-bold transition-all cursor-pointer"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{provider === 'google' ? 'Google AI Studio (Gemini 3.8 Flash)' : externalProviderName}</span>
+              <span>{externalProviderName || 'سرویس تنظیم‌نشده'}</span>
               <span className="text-[10px] text-purple-400 underline mr-1">تغییر یا تست سلامت API</span>
             </button>
           </div>
@@ -339,28 +344,30 @@ export const InputStep: React.FC<InputStepProps> = ({
             {BGM_PRESETS.map((bgm) => {
               const isSelected = selectedBgm === bgm.id;
               return (
-                <button
+                <div
                   key={bgm.id}
-                  type="button"
-                  onClick={() => setSelectedBgm(bgm.id)}
-                  className={`p-3.5 rounded-2xl border text-right transition-all flex items-start justify-between gap-3 ${
+                  className={`p-3.5 rounded-2xl border transition-all flex flex-col gap-3 ${
                     isSelected
                       ? 'bg-pink-600/15 border-pink-500 ring-1 ring-pink-500'
                       : 'bg-slate-950/40 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Music className={`w-4 h-4 ${isSelected ? 'text-pink-400' : 'text-slate-400'}`} />
-                      <span className="text-xs font-bold text-white">{bgm.nameFa}</span>
+                  <button type="button" onClick={() => setSelectedBgm(bgm.id)} className="w-full text-right flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Music className={`w-4 h-4 ${isSelected ? 'text-pink-400' : 'text-slate-400'}`} />
+                        <span className="text-xs font-bold text-white">{bgm.nameFa}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-tight">{bgm.descriptionFa}</p>
+                      <span className="inline-block text-[10px] text-purple-300 font-mono mt-1">{bgm.tempo}</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-tight">{bgm.descriptionFa}</p>
-                    <span className="inline-block text-[10px] text-purple-300 font-mono mt-1">
-                      {bgm.tempo}
-                    </span>
-                  </div>
-                  {isSelected && <CheckCircle2 className="w-4 h-4 text-pink-400 shrink-0" />}
-                </button>
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-pink-400 shrink-0" />}
+                  </button>
+                  <button type="button" onClick={() => onPreviewBgm(bgm.id)} className="self-start flex items-center gap-1.5 rounded-lg border border-pink-500/30 bg-pink-500/10 px-2.5 py-1.5 text-[10px] font-semibold text-pink-300 hover:bg-pink-500/20">
+                    <Play className="h-3 w-3" />
+                    <span>پیش‌شنوی آفلاین</span>
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -473,6 +480,18 @@ export const InputStep: React.FC<InputStepProps> = ({
           <span className="text-xs text-slate-400">
             پس از ساخت سناریو، می‌توانید تک‌تک دیالوگ‌ها را ویرایش و با موسیقی ترکیب کنید.
           </span>
+          {isGenerating && (
+            <div className="w-full max-w-xl space-y-2 rounded-xl border border-purple-500/20 bg-slate-950/60 p-4">
+              <div className="flex items-center justify-between gap-3 text-xs text-slate-300">
+                <span>{scriptProgress.message || 'در حال ارتباط با مدل و تولید سناریو...'}</span>
+                <span className="font-bold tabular-nums">{scriptProgress.percent.toLocaleString('fa-IR')}٪</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500" style={{ width: `${scriptProgress.percent}%` }} />
+              </div>
+              <p className="text-[10px] text-slate-500">درصد، مراحل درخواست و دریافت پاسخ را نشان می‌دهد؛ سرویس مدل درصد دقیق تولید توکن را ارائه نمی‌کند.</p>
+            </div>
+          )}
         </div>
       </form>
     </div>

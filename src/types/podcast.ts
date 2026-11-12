@@ -5,7 +5,7 @@ export type PlaybackSpeed = 'slow' | 'normal' | 'fast' | 'veryFast';
 export type BgmStyle = 'lofi' | 'ambient' | 'acoustic' | 'cinematic' | 'iranian-fusion' | 'none';
 export type SfxType = 'intro' | 'transition' | 'ding' | 'laugh' | 'applause' | 'outro' | 'none';
 
-export type AiProviderType = 'google' | 'external';
+export type AiProviderType = 'external';
 
 export interface ExternalProviderConfig {
   enabled: boolean;
@@ -13,6 +13,10 @@ export interface ExternalProviderConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
+  ttsProvider?: 'openai-compatible' | 'google-gemini';
+  googleTtsApiKey?: string;
+  googleTtsVoice?: string;
+  googleTtsLanguageCode?: string;
   lastHealthCheck?: {
     healthy: boolean;
     timestamp: number;
@@ -72,6 +76,9 @@ export interface PodcastEpisode {
   coverArtUrl?: string;
   coverGradient?: string;
   episodeNumber?: number;
+  sourceText?: string;
+  projectStatus?: 'draft' | 'script-ready' | 'audio-in-progress' | 'completed';
+  lastUpdatedAt?: number;
 }
 
 export interface PodcastChannelInfo {

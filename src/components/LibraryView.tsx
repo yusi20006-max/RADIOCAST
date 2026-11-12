@@ -89,6 +89,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
                       {toneInfo?.emoji} {toneInfo?.labelFa}
                     </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                      {ep.projectStatus === 'completed' ? 'تکمیل‌شده' : ep.projectStatus === 'audio-in-progress' ? 'آماده ادامه صوت' : 'پروژه ذخیره‌شده'}
+                    </span>
                   </div>
 
                   <button
@@ -138,7 +141,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   className="w-full py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Play className="w-4 h-4 fill-current" />
-                  <span>پخش و ویرایش در استودیو</span>
+                  <span>{ep.projectStatus === 'completed' ? 'بازکردن پروژه و ویرایش' : 'ادامه پروژه از مرحله ذخیره‌شده'}</span>
                 </button>
               </div>
             );

@@ -1,138 +1,154 @@
-# 🎙️ رادیو کست (RadioCast)
-### استودیوی هوش مصنوعی ساخت پادکست‌های رادیویی فارسی
+<div align="center">
 
-پلتفرم پیشرفته و یکپارچه تبدیل متن فارسی به پادکست رادیویی با گویندگان هوش مصنوعی، تنظیم لحن و سرعت صدا، موسیقی متن داینامیک، طراحی خودکار کاور آرت و تولید فید استاندارد RSS 2.0 برای پادگیرها.
+<img src="public/branding/radiocast-readme-banner.svg" alt="RADIOCAST — Smart Podcast with AI" width="100%" />
 
----
+# RADIOCAST
 
-## ✨ ویژگی‌ها و امکانات کلیدی
+### استودیوی هوشمند ساخت پادکست · AI-Powered Podcast Studio
 
-1. **تبدیل خودکار متن به سناریوی رادیویی دو گوینده (Dual-Host)**:
-   - بازنویسی هوشمند متن‌های خام فارسی به دیالوگ‌های جذاب رادیویی با دو مجری (نیما و سارا یا اسامی سفارشی).
-   - تحلیل عمیق احساسات، ایجاد سرفصل‌ها (Show Notes) و تگ‌های پادکست.
+**از متن خام تا یک برنامه صوتی خوش‌ساخت؛ با کمک هوش مصنوعی، صدای طبیعی و میکس موسیقی.**
 
-2. **سنتز صدای طبیعی و چندلحنی (Dynamic Tone Adaptation)**:
-   - پشتیبانی از گویندگان پیشرفته هوش مصنوعی (Puck, Kore, Fenrir, Zephyr, Charon).
-   - تشخیص و اعمال لحن گوینده پاراگراف به پاراگراف (کنجکاو برای سوالات، هیجان‌زده برای تعجب، آرام برای تامل، دوستانه و جدی).
-   - تنظیم سرعت گویندگان (۰.۸x، ۱.۰x، ۱.۲۵x، ۱.۵x).
+<p>
+  <a href="#فارسی">فارسی</a> ·
+  <a href="#english">English</a> ·
+  <a href="https://github.com/yusi20006-max/RADIOCAST/actions">وضعیت ساخت</a>
+</p>
 
-3. **موتور میکس صدا و موسیقی متن (Audio Ducking & BGM)**:
-   - پخش و ترکیب هوشمند موسیقی زمینه به همراه کاهش خودکار صدای موزیک در زمان صحبت گوینده (Audio Ducking).
-   - ۶ سبک موسیقی اختصاصی (Lo-Fi، امبینت آرامش‌بخش، آکوستیک، سینمایی، تلفیقی ایرانی و بدون موسیقی).
-   - افکت‌های صوتی استودیویی (جینگل ورودی، خروجی، صدای زنگ، تشویق و ترنزیشن).
+<p>
+  <img src="https://img.shields.io/github/actions/workflow/status/yusi20006-max/RADIOCAST/build-apk.yml?branch=main&style=for-the-badge&label=Build" alt="Build status" />
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-2563eb?style=for-the-badge" alt="Android and Web" />
+  <img src="https://img.shields.io/badge/Language-Persian%20%7C%20English-7c3aed?style=for-the-badge" alt="Persian and English" />
+</p>
 
-4. **خروجی MP3 باکیفیت استودیویی و شناسنامه (Metadata)**:
-   - انکود مستقیم فایل MP3 با کیفیت 192kbps استریو.
-   - خروجی Lossless WAV برای ادیتورهای حرفه‌ای صوت در نرم‌افزارهای DAW.
-   - کپی Show Notes همراه با زمان‌بندی دقیق فصول (Chapters) مناسب کست‌باکس و یوتیوب.
-
-5. **🎨 استودیوی طراحی کاور آرت پادکست (Cover Art Studio)**:
-   - طراحی خودکار کاورهای استاندارد ۱۴۰۰×۱۴۰۰ پیکسل با قابلیت خروجی ۳۰۰۰ پیکسل.
-   - ۶ قالب گرافیکی (سایبرپانک نئونی، مینیمال ژورنالی، اصیل ایرانی، کهکشانی هوش مصنوعی، کاست رترو و نوآر).
-   - خروجی PNG باکیفیت و اتصال مستقیم به پخش‌کننده و فید RSS.
-
-6. **📡 فید رسمی پادکست (Podcast RSS 2.0 Generator)**:
-   - تولید و میزبانی فید رسمی XML مطابق استانداردهای Apple Podcasts، Spotify و Castbox (`/api/podcast/rss.xml`).
-   - شناسنامه کامل کانال و راهنمای انتشار در پادگیرهای ایرانی و بین‌المللی.
-
-7. **📱 وب‌اپلیکیشن پیشرفته (PWA) و نسخه موبایل**:
-   - قابلیت نصب مستقیم روی گوشی‌های اندروید و iOS بدون نیاز به استور.
-   - پشتیبانی از ساخت آسان فایل خروجی APK با PWABuilder.
-
-8. **🔌 اتصال به APIهای خارجی**:
-   - امکان اتصال به ارائه‌دهندگان دلخواه (OpenAI، Groq، Claude یا سرورهای محلی Ollama) با تست پینگ و سلامت لحظه‌ای، ضمن حفظ Google AI Studio به عنوان موتور اصلی.
+</div>
 
 ---
 
-## 📂 ساختار فایل‌های پروژه
+<a id="فارسی"></a>
 
-```text
-RADIOCAST/
-├── server.ts                   # سرور Express با اندپوینت‌های Gemini AI، فید RSS و دانلود
-├── package.json                # وابستگی‌ها و اسکریپت‌های اجرایی
-├── vite.config.ts              # تنظیمات کامپایلر Vite و Tailwind CSS
-├── tsconfig.json               # پیکربندی TypeScript
-├── metadata.json               # متادیتای AI Studio
-├── .env.example                # نمونه متغیرهای محیطی
-├── public/                     # فایل‌های استاتیک و PWA
-│   ├── manifest.json           # مانیفست وب‌اپلیکیشن برای نصب روی اندروید
-│   ├── sw.js                   # Service Worker جهت کش و رفتار آفلاین
-│   ├── icon-192.png            # آیکون سایز ۱۹۲ برای موبایل
-│   ├── icon-512.png            # آیکون سایز ۵۱۲ برای موبایل
-│   └── radiocast-podcast-studio.zip # بسته فشرده سورس‌کد
-└── src/
-    ├── App.tsx                 # کامپوننت اصلی استودیو و مدیریت استیت‌ها
-    ├── main.tsx                # نقطه ورود React و رجیستر Service Worker
-    ├── index.css               # استایل‌های سراسری با Tailwind CSS
-    ├── types/                  # تایپ‌های تایپ‌اسکریپت پادکست و لیم
-    │   ├── podcast.ts
-    │   └── lamejs.d.ts
-    ├── utils/                  # ابزارها و ماژول‌های کمکی
-    │   ├── audioEngine.ts      # پردازش صوت، افکت‌ها، میکسر و انکودر MP3
-    │   ├── constants.ts        # تنظیمات پیش‌فرض صداها، قالب‌ها و موسیقی‌ها
-    │   └── persianSamples.ts   # متن‌های نمونه آماده جهت تست
-    └── components/             # کامپوننت‌های رابط کاربری
-        ├── Header.tsx          # نوار بالای استودیو و دسترسی سریع
-        ├── InputStep.tsx       # صفحه وارد کردن متن و تنظیمات اولیه
-        ├── ScreenplayEditor.tsx# ادیتور سناریو، دیالوگ‌ها و لحن گویندگان
-        ├── StudioPlayer.tsx    # پلیر استودیویی با امواج صوت و کنترل‌ها
-        ├── CoverArtGeneratorModal.tsx # استودیوی طراحی کاور آرت
-        ├── RssFeedModal.tsx    # مدیریت و تولید فید RSS پادگیرها
-        ├── ExportAppModal.tsx  # پنجره دریافت خروجی ZIP و APK
-        ├── ShareAndExportModal.tsx # خروجی MP3، WAV و اشتراک‌گذاری
-        ├── ApiProviderModal.tsx# تنظیمات API هوش مصنوعی خارجی
-        ├── LibraryView.tsx     # آرشیو محلی پادکست‌های ذخیره‌شده
-        └── GuideModal.tsx      # راهنمای کامل استفاده از امکانات
-```
+## 🎙️ درباره RADIOCAST
 
----
+**رادیوکست** یک استودیوی تولید پادکست با کمک هوش مصنوعی است. متن یا ایده‌ات را وارد کن، سناریوی گفت‌وگومحور بساز، صداها و موسیقی را انتخاب کن و خروجی صوتی آماده انتشار بگیر.
 
-## 🚀 راهنمای نصب و اجرای محلی (Localhost)
+رادیوکست برای ساخت اپیزودهای فارسی طراحی شده و به ارائه‌دهنده‌های مختلف هوش مصنوعی متصل می‌شود؛ بنابراین می‌توانی سرویس و مدل دلخواهت را در تنظیمات وارد کنی.
+
+## ✨ قابلیت‌ها
+
+| قابلیت | توضیح |
+|---|---|
+| 🧠 **سناریونویسی با AI** | تبدیل متن خام به سناریوی رادیویی ساختاریافته و گفت‌وگوی چندگوینده‌ای، همراه با سرفصل‌ها و یادداشت‌های برنامه |
+| 🎧 **تولید صدای هوشمند** | تولید دیالوگ‌ها با صداهای قابل انتخاب، لحن‌های متناسب با محتوا و کنترل سرعت گویندگان |
+| 🎚️ **میکس و موسیقی** | ترکیب صدای گویندگان با موسیقی زمینه، کاهش خودکار صدای موسیقی هنگام گفتگو (Audio Ducking) و افکت‌های صوتی |
+| 💾 **پروژه‌های قابل ادامه** | ذخیره خودکار پروژه‌ها و بخش‌های صوتی تولیدشده؛ بازکردن پروژه نیمه‌تمام و ادامه از همان مرحله |
+| 🎼 **پیش‌شنوی آفلاین موسیقی** | پیش‌شنوی محلی نمونه‌های موسیقی زمینه پیش از انتخاب و میکس نهایی |
+| 📦 **خروجی و انتشار** | خروجی صوتی MP3 و WAV، اطلاعات اپیزود و یادداشت‌های برنامه |
+| 🎨 **طراحی کاور** | ساخت کاور اختصاصی برای اپیزود با قالب‌های گرافیکی متنوع |
+| 📡 **فید پادکست** | ابزار ساخت فید RSS 2.0 برای پادگیرهای سازگار |
+
+## 🚀 شروع سریع
 
 ### پیش‌نیازها
-- **Node.js**: نسخه 20 به بالا
-- **NPM** یا **Bun**
 
-### مراحل راه‌اندازی:
-1. مخزن را کلون کنید:
-   ```bash
-   git clone https://github.com/yusi20006-max/RADIOCAST.git
-   cd RADIOCAST
-   ```
+- Node.js نسخه 20 یا بالاتر
+- npm
+- یک سرویس هوش مصنوعی سازگار با رابط مورد پشتیبانی برنامه
+- کلید API معتبر از ارائه‌دهنده انتخابی
 
-2. وابستگی‌ها را نصب کنید:
-   ```bash
-   npm install
-   ```
+### نصب و اجرای نسخه توسعه
 
-3. متغیرهای محیطی را تنظیم کنید:
-   فایل `.env.example` را به `.env` تغییر نام داده و کلید API جمینای خود را وارد کنید:
-   ```env
-   GEMINI_API_KEY="your_gemini_api_key_here"
-   PORT=3000
-   ```
-
-4. پروژه را اجرا کنید:
-   ```bash
-   npm run dev
-   ```
-
-5. مرورگر خود را باز کرده و به آدرس زیر بروید:
-   ```text
-   http://localhost:3000
-   ```
-
----
-
-## 🛠️ ساخت نسخه نهایی برای انتشار (Build)
-
-برای کامپایل نسخه نهایی پروداکشن:
 ```bash
-npm run build
-npm start
+git clone https://github.com/yusi20006-max/RADIOCAST.git
+cd RADIOCAST
+npm install
+npm run dev
 ```
 
+### تنظیم اتصال هوش مصنوعی
+
+1. برنامه را باز کن و وارد تنظیمات هوش مصنوعی شو.
+2. نشانی پایه سرویس (Base URL)، کلید API و شناسه مدل (Model ID) را وارد کن.
+3. اتصال را بررسی کن و سپس تولید سناریو یا صدا را آغاز کن.
+
+> اطلاعات اتصال به‌صورت پیش‌فرض در مخزن قرار نمی‌گیرند و باید توسط کاربر وارد شوند. تولید محتوا با سرویس ابری به اینترنت و اعتبار API نیاز دارد.
+
+## 📱 اندروید
+
+ساخت APK از طریق GitHub Actions انجام می‌شود:
+
+- [مشاهده اجرای ساخت APK](https://github.com/yusi20006-max/RADIOCAST/actions/workflows/build-apk.yml)
+- آخرین اجرای موفق را باز کن و از بخش **Artifacts** فایل خروجی را دریافت کن.
+- فایل Artifact را از حالت ZIP خارج و APK را روی دستگاه نصب کن.
+
+## 🧩 روند پیشنهادی ساخت اپیزود
+
+1. متن، موضوع یا محتوای اولیه را وارد کن.
+2. سناریوی پیشنهادی هوش مصنوعی را بررسی و ویرایش کن.
+3. گویندگان، لحن و سرعت را تنظیم کن.
+4. موسیقی زمینه را پیش‌شنوی و انتخاب کن.
+5. تولید صدا و میکس را اجرا کن.
+6. در صورت توقف، پروژه را از کتابخانه باز کن و ادامه بده.
+7. خروجی MP3 یا WAV را دریافت کن.
+
+## 🛠️ فناوری‌ها
+
+- React و TypeScript
+- Vite
+- Capacitor برای بسته‌بندی اندروید
+- Web Audio API برای پردازش و میکس صدا
+- IndexedDB برای ذخیره محلی پروژه‌ها
+- GitHub Actions برای بررسی و ساخت APK
+
+## 🗺️ وضعیت پروژه
+
+RADIOCAST در حال توسعه است. ساخت موفق برنامه به‌تنهایی به معنی تأیید همه سرویس‌های خارجی نیست؛ اتصال واقعی به ارائه‌دهنده AI، تولید صدا و نصب/پخش روی دستگاه باید با کلید API و دستگاه واقعی آزمایش شود.
+
+## 🤝 مشارکت
+
+برای گزارش خطا، پیشنهاد قابلیت یا مشارکت در توسعه، از بخش [Issues](https://github.com/yusi20006-max/RADIOCAST/issues) استفاده کن.
+
 ---
 
-## 📄 لایسنس
-این پروژه تحت لایسنس Apache-2.0 منتشر شده است.
+<a id="english"></a>
+
+## English
+
+**RADIOCAST** is an AI-assisted podcast production studio. Turn source text into a structured, multi-speaker script, generate voice dialogue, preview background music, mix audio, and prepare an episode for publishing.
+
+### Highlights
+
+- **AI scripting:** transform source material into an editable, radio-style conversation.
+- **Voice generation:** configurable speakers, delivery styles, and speaking speed.
+- **Audio production:** background music, audio ducking, transitions, and sound effects.
+- **Resumable projects:** automatic local saving and reuse of completed audio segments.
+- **Offline music preview:** preview locally generated background-music samples before mixing.
+- **Exports:** MP3 and WAV audio, episode notes, and cover artwork.
+- **RSS tooling:** create a podcast RSS 2.0 feed for compatible platforms.
+
+### Quick start
+
+```bash
+git clone https://github.com/yusi20006-max/RADIOCAST.git
+cd RADIOCAST
+npm install
+npm run dev
+```
+
+Configure your provider in the app by entering its **Base URL**, **API Key**, and **Model ID**. No provider credentials are bundled as defaults. Cloud AI generation requires internet access and a valid API key.
+
+### Android build
+
+Open [GitHub Actions](https://github.com/yusi20006-max/RADIOCAST/actions/workflows/build-apk.yml), select a successful run, and download the APK from its **Artifacts** section.
+
+### Project status
+
+RADIOCAST is under active development. CI/build success does not replace real-device testing of provider connectivity, voice generation, audio playback, and APK installation.
+
+---
+
+<div align="center">
+
+**RADIOCAST — Create · Generate · Listen · Share**
+
+<sub>Built for stories worth hearing.</sub>
+
+</div>

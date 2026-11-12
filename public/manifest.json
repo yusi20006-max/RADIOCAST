@@ -1,35 +1,23 @@
 {
   "id": "/",
-  "name": "رادیو کست | استودیوی هوش مصنوعی ساخت پادکست فارسی",
-  "short_name": "رادیو کست",
-  "description": "استودیوی حرفه‌ای تبدیل متن فارسی به پادکست با گویندگان هوش مصنوعی، موسیقی زمینه و فید RSS",
+  "name": "RADIOCAST | AI Podcast Studio",
+  "short_name": "RADIOCAST",
+  "description": "AI-assisted podcast studio for scripting, voice generation, audio mixing and podcast publishing.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#090d16",
-  "theme_color": "#7c3aed",
+  "background_color": "#080d20",
+  "theme_color": "#171b55",
   "dir": "rtl",
   "lang": "fa",
   "categories": ["entertainment", "music", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
+      "src": "/branding/radiocast-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }

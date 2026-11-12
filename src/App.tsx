@@ -9,6 +9,7 @@ import { LibraryView } from './components/LibraryView';
 import { GuideModal } from './components/GuideModal';
 import { ApiProviderModal } from './components/ApiProviderModal';
 import { CoverArtGeneratorModal } from './components/CoverArtGeneratorModal';
+import { generatePodcastScript, synthesizeSpeech } from './utils/aiClient';
 import { RssFeedModal } from './components/RssFeedModal';
 import { ExportAppModal } from './components/ExportAppModal';
 import {
@@ -27,19 +28,30 @@ import {
   mixPodcastAudioBuffer,
   encodeAudioBufferToMp3,
   encodeAudioBufferToWav,
-  createSyntheticSfx,
+  createSyntheticBgmBuffer,
 } from './utils/audioEngine';
+import { deleteProject, loadProjects, saveProject } from './utils/projectStorage';
 
 const STORAGE_KEY = 'radiocast_persian_podcasts_v1';
 const EXTERNAL_CONFIG_KEY = 'radiocast_external_ai_v1';
 
 const DEFAULT_EXTERNAL_CONFIG: ExternalProviderConfig = {
   enabled: false,
-  name: 'OpenAI',
-  baseUrl: 'https://api.openai.com/v1',
+  name: '',
+  baseUrl: '',
   apiKey: '',
-  model: 'gpt-4o-mini',
+  model: '',
 };
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'studio' | 'library'>('studio');
@@ -47,17 +59,20 @@ export default function App() {
 
   const [currentEpisode, setCurrentEpisode] = useState<PodcastEpisode | null>(null);
   const [savedEpisodes, setSavedEpisodes] = useState<PodcastEpisode[]>([]);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
 
-  // AI Provider states (Google AI Studio as primary, optional external API)
-  const [aiProvider, setAiProvider] = useState<AiProviderType>('google');
+  // AI provider settings are supplied and stored locally by the user.
+  const [aiProvider, setAiProvider] = useState<AiProviderType>('external');
   const [externalConfig, setExternalConfig] = useState<ExternalProviderConfig>(DEFAULT_EXTERNAL_CONFIG);
   const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
 
   const [isGeneratingScript, setIsGeneratingScript] = useState<boolean>(false);
+  const [scriptProgress, setScriptProgress] = useState({ percent: 0, message: '' });
   const [isSynthesizingAudio, setIsSynthesizingAudio] = useState<boolean>(false);
   const [synthesizingProgress, setSynthesizingProgress] = useState({
     current: 0,
     total: 0,
+    percent: 0,
     message: '',
   });
 
@@ -81,20 +96,47 @@ export default function App() {
 
   // Audio Node references
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const bgmPreviewSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const bgmPreviewStyleRef = useRef<BgmStyle | null>(null);
   const startTimeRef = useRef<number>(0);
   const pauseOffsetRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
 
-  // Load saved episodes and external AI config from localStorage on mount
+  // Load projects from IndexedDB and migrate the previous localStorage archive once.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setSavedEpisodes(JSON.parse(stored));
+    let active = true;
+    (async () => {
+      try {
+        let projects = await loadProjects();
+        if (projects.length === 0) {
+          const legacy = localStorage.getItem(STORAGE_KEY);
+          if (legacy) {
+            const oldProjects = JSON.parse(legacy) as PodcastEpisode[];
+            for (const project of oldProjects) await saveProject(project);
+            projects = oldProjects;
+          }
+        }
+        if (active) setSavedEpisodes(projects);
+      } catch (error) {
+        console.error('Failed to load IndexedDB projects:', error);
+        try {
+          const legacy = localStorage.getItem(STORAGE_KEY);
+          if (legacy && active) setSavedEpisodes(JSON.parse(legacy));
+        } catch (legacyError) { console.error('Legacy project migration failed:', legacyError); }
+      } finally {
+        if (active) setProjectsLoaded(true);
       }
+    })();
+    try {
       const storedExt = localStorage.getItem(EXTERNAL_CONFIG_KEY);
       if (storedExt) {
-        const parsedExt = JSON.parse(storedExt);
+        const parsedExt = { ...DEFAULT_EXTERNAL_CONFIG, ...JSON.parse(storedExt) };
+        if (!parsedExt.apiKey?.trim()) {
+          parsedExt.name = '';
+          parsedExt.baseUrl = '';
+          parsedExt.model = '';
+          parsedExt.enabled = false;
+        }
         setExternalConfig(parsedExt);
         if (parsedExt.enabled) {
           setAiProvider('external');
@@ -104,6 +146,16 @@ export default function App() {
       console.error('Failed to load saved settings:', e);
     }
   }, []);
+
+  // Autosave the active project after edits, including changes made in the screenplay editor.
+  useEffect(() => {
+    if (!projectsLoaded || !currentEpisode) return;
+    const timer = window.setTimeout(() => {
+      saveProject(currentEpisode).catch((error) => console.error('Project autosave failed:', error));
+      setSavedEpisodes((previous) => [currentEpisode, ...previous.filter((item) => item.id !== currentEpisode.id)]);
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [currentEpisode, projectsLoaded]);
 
   const handleSaveExternalConfig = (config: ExternalProviderConfig) => {
     setExternalConfig(config);
@@ -119,45 +171,39 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const saveEpisodeToStorage = (episode: PodcastEpisode) => {
+  const saveEpisodeToStorage = async (episode: PodcastEpisode) => {
     try {
-      const exists = savedEpisodes.some((e) => e.id === episode.id);
-      let updated: PodcastEpisode[];
-      if (exists) {
-        updated = savedEpisodes.map((e) => (e.id === episode.id ? episode : e));
-      } else {
-        updated = [episode, ...savedEpisodes];
-      }
-      setSavedEpisodes(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      showToast('اپیزود با موفقیت در آرشیو شما ذخیره شد.');
-    } catch (e) {
-      console.error('Failed to save episode:', e);
+      await saveProject({ ...episode, projectStatus: episode.projectStatus || 'completed' });
+      setSavedEpisodes((previous) => [episode, ...previous.filter((item) => item.id !== episode.id)]);
+      showToast('پروژه با موفقیت ذخیره شد.');
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      showToast('ذخیره پروژه انجام نشد؛ فضای ذخیره‌سازی دستگاه را بررسی کنید.');
     }
   };
 
-  const handleDeleteSavedEpisode = (id: string) => {
-    const updated = savedEpisodes.filter((e) => e.id !== id);
-    setSavedEpisodes(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    showToast('اپیزود از آرشیو حذف گردید.');
+  const handleDeleteSavedEpisode = async (id: string) => {
+    try {
+      await deleteProject(id);
+      setSavedEpisodes((previous) => previous.filter((episode) => episode.id !== id));
+      showToast('پروژه حذف شد.');
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      showToast('حذف پروژه انجام نشد.');
+    }
   };
 
-  const handleApplyCoverToEpisode = (coverUrl: string) => {
+  const handleApplyCoverToEpisode = async (coverUrl: string) => {
     if (currentEpisode) {
       const updated = { ...currentEpisode, coverArtUrl: coverUrl };
       setCurrentEpisode(updated);
-      const exists = savedEpisodes.some((e) => e.id === updated.id);
-      if (exists) {
-        const newSaved = savedEpisodes.map((e) => (e.id === updated.id ? updated : e));
-        setSavedEpisodes(newSaved);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaved));
-      }
+      await saveProject(updated);
+      setSavedEpisodes((previous) => [updated, ...previous.filter((item) => item.id !== updated.id)]);
       showToast('کاور آرت با موفقیت روی اپیزود تنظیم گردید.');
     }
   };
 
-  // Step 1: Generate Script via Gemini 3.8 Flash (Primary) or External LLM
+  // Generate a podcast script directly through the user's configured OpenAI-compatible API.
   const handleGenerateScript = async (params: {
     sourceText: string;
     format: PodcastFormat;
@@ -173,26 +219,14 @@ export default function App() {
   }) => {
     try {
       setIsGeneratingScript(true);
-      const res = await fetch('/api/podcast/generate-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...params,
-          aiProvider,
-          externalConfig: aiProvider === 'external' ? externalConfig : undefined,
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'خطا در ارتباط با سرور هوش مصنوعی.');
-      }
-
-      const data = await res.json();
-
+      setScriptProgress({ percent: 8, message: 'در حال آماده‌سازی درخواست سناریو...' });
+      const data = await generatePodcastScript(externalConfig, params, (percent, message) => setScriptProgress({ percent, message }));
+      setScriptProgress({ percent: 94, message: 'سناریو استخراج شد؛ در حال ذخیره پروژه...' });
       const newEpisode: PodcastEpisode = {
         id: 'ep-' + Date.now(),
         createdAt: Date.now(),
+        sourceText: params.sourceText,
+        projectStatus: 'script-ready',
         title: data.title || 'اپیزود جدید رادیو کست',
         episodeSummary: data.episodeSummary || '',
         genre: data.genre || 'عمومی',
@@ -206,81 +240,61 @@ export default function App() {
         host2Voice: params.host2Voice,
         suggestedBgm: data.suggestedBgm || params.bgmStyle,
         bgmVolume: 0.35,
-        tags: data.tags || ['پادکست_فارسی', 'هوش_مصنوعی'],
-        chapters: data.chapters || [{ title: 'مقدمه', startTurnIndex: 0 }],
-        script: (data.script || []).map((t: any, idx: number) => ({
+        tags: Array.isArray(data.tags) ? data.tags : ['پادکست_فارسی', 'هوش_مصنوعی'],
+        chapters: Array.isArray(data.chapters) ? data.chapters : [{ title: 'مقدمه', startTurnIndex: 0 }],
+        script: data.script.map((t: any, idx: number) => ({
           ...t,
           id: 'turn-' + idx + '-' + Date.now(),
+          speaker: t.speaker === 'host2' ? 'host2' : 'host1',
+          speakerName: t.speakerName || (t.speaker === 'host2' ? params.host2Name : params.host1Name),
           turnTone: t.turnTone || (t.text?.includes('؟') ? 'curious' : t.text?.includes('!') ? 'excited' : 'friendly'),
         })),
         coverGradient: 'from-purple-900 via-indigo-900 to-slate-900',
       };
 
+      await saveProject(newEpisode);
+      setSavedEpisodes((previous) => [newEpisode, ...previous.filter((item) => item.id !== newEpisode.id)]);
       setCurrentEpisode(newEpisode);
+      setScriptProgress({ percent: 100, message: 'سناریو با موفقیت ذخیره شد.' });
       setStudioStep('editor');
-      showToast('سناریوی پادکست آماده شد! می‌توانید متن‌ها را بررسی کنید.');
+      showToast('سناریو ساخته و به‌عنوان پروژه ذخیره شد.');
     } catch (error: any) {
       console.error('Script generation failed:', error);
-      alert(error.message || 'خطا در تولید سناریوی پادکست. لطفاً اتصال اینترنت خود را بررسی کنید.');
+      setScriptProgress({ percent: 0, message: error.message || 'ساخت سناریو ناموفق بود.' });
+      alert(error.message || 'خطا در تولید سناریوی پادکست.');
     } finally {
       setIsGeneratingScript(false);
     }
   };
 
-  // Preview a single turn
+  // Preview one dialogue turn using the configured provider's speech endpoint.
   const handlePreviewTurn = async (turn: DialogueTurn) => {
     if (!currentEpisode) return;
     setPreviewingTurnId(turn.id);
-
     try {
-      const voice = turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice;
       let base64 = turn.audioBase64;
-
       if (!base64) {
-        const res = await fetch('/api/podcast/synthesize-turn', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: turn.text,
-            voiceName: voice,
-            style: turn.speechStyle,
-            speed: currentEpisode.speed,
-            turnTone: turn.turnTone || 'auto',
-          }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          base64 = data.audioBase64;
-          // Cache in turn
-          turn.audioBase64 = base64;
-        }
+        const audioData = await synthesizeSpeech(externalConfig, turn.text,
+          turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice,
+          currentEpisode.speed);
+        base64 = arrayBufferToBase64(audioData);
+        turn.audioBase64 = base64;
       }
-
       const ctx = getAudioContext();
-      if (base64) {
-        const buf = await decodeAudioBase64(base64, ctx);
-        const source = ctx.createBufferSource();
-        source.buffer = buf;
-        source.connect(ctx.destination);
-        source.start();
-      } else {
-        // Fallback Web Speech
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utter = new SpeechSynthesisUtterance(turn.text);
-          utter.lang = 'fa-IR';
-          window.speechSynthesis.speak(utter);
-        }
-      }
-    } catch (e) {
+      const buf = await decodeAudioBase64(base64, ctx);
+      const source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.connect(ctx.destination);
+      source.start();
+    } catch (e: any) {
       console.error('Preview error:', e);
-      // Fallback Web Speech
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(turn.text);
         utter.lang = 'fa-IR';
         window.speechSynthesis.speak(utter);
+      } else {
+        alert(e.message || 'پیش‌نمایش صدا در دسترس نیست.');
       }
     } finally {
       setTimeout(() => setPreviewingTurnId(null), 1500);
@@ -296,7 +310,8 @@ export default function App() {
 
     setIsSynthesizingAudio(true);
     const totalTurns = currentEpisode.script.length;
-    setSynthesizingProgress({ current: 0, total: totalTurns, message: 'آغاز پردازش استودیو...' });
+    setSynthesizingProgress({ current: 0, total: totalTurns, percent: 0, message: 'آغاز پردازش پروژه...' });
+    let workingEpisode: PodcastEpisode = { ...currentEpisode, projectStatus: 'audio-in-progress' };
 
     const ctx = getAudioContext();
     const voiceBuffers: { buffer: AudioBuffer; sfxCue?: any }[] = [];
@@ -304,65 +319,49 @@ export default function App() {
     try {
       for (let i = 0; i < totalTurns; i++) {
         const turn = currentEpisode.script[i];
+        const cachedAudio = Boolean(turn.audioBase64);
         setSynthesizingProgress({
-          current: i + 1,
+          current: i,
           total: totalTurns,
-          message: `در حال تولید صدای ${turn.speakerName} (${i + 1} از ${totalTurns})...`,
+          percent: Math.round((i / Math.max(1, totalTurns)) * 70),
+          message: cachedAudio
+            ? `بخش ${i + 1} از ${totalTurns} آماده است؛ در حال بازیابی فایل ذخیره‌شده...`
+            : `در حال تولید صوت گوینده ${turn.speakerName}؛ بخش ${i + 1} از ${totalTurns}`,
         });
 
         let base64 = turn.audioBase64;
         const voice = turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice;
 
         if (!base64) {
-          try {
-            const res = await fetch('/api/podcast/synthesize-turn', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                text: turn.text,
-                voiceName: voice,
-                style: turn.speechStyle,
-                speed: currentEpisode.speed,
-                turnTone: turn.turnTone || 'auto',
-              }),
-            });
-
-            if (res.ok) {
-              const data = await res.json();
-              base64 = data.audioBase64;
-              turn.audioBase64 = base64;
-            }
-          } catch (turnErr) {
-            console.warn('API TTS failed for turn, generating synthetic placeholder buffer', turnErr);
-          }
+          const audioData = await synthesizeSpeech(externalConfig, turn.text, voice, currentEpisode.speed);
+          base64 = arrayBufferToBase64(audioData);
         }
 
-        let audioBuf: AudioBuffer;
-        if (base64) {
-          audioBuf = await decodeAudioBase64(base64, ctx);
-        } else {
-          // Synthetic procedural speech proxy buffer based on text length
-          const estimatedDuration = Math.max(2.5, turn.text.length * 0.08);
-          audioBuf = ctx.createBuffer(2, Math.floor(ctx.sampleRate * estimatedDuration), ctx.sampleRate);
-          const ch0 = audioBuf.getChannelData(0);
-          const ch1 = audioBuf.getChannelData(1);
-          const baseFreq = turn.speaker === 'host1' ? 140 : 210;
-          for (let s = 0; s < ch0.length; s++) {
-            const t = s / ctx.sampleRate;
-            const formant = Math.sin(2 * Math.PI * baseFreq * t) * 0.15;
-            const mod = 0.5 + 0.5 * Math.sin(t * 12);
-            ch0[s] = formant * mod;
-            ch1[s] = formant * mod;
-          }
-        }
+        // Decode and validate the returned file before marking this turn complete.
+        const audioBuf = await decodeAudioBase64(base64, ctx);
+
+        // Persist every successfully decoded speech segment. Retries skip cached segments.
+        const updatedScript = workingEpisode.script.map((item) =>
+          item.id === turn.id ? { ...item, audioBase64: base64 } : item
+        );
+        workingEpisode = { ...workingEpisode, script: updatedScript, projectStatus: 'audio-in-progress' };
+        setCurrentEpisode(workingEpisode);
+        await saveProject(workingEpisode);
 
         voiceBuffers.push({ buffer: audioBuf, sfxCue: turn.sfxCue });
+        setSynthesizingProgress({
+          current: i + 1,
+          total: totalTurns,
+          percent: Math.round(((i + 1) / Math.max(1, totalTurns)) * 70),
+          message: `صوت بخش ${i + 1} از ${totalTurns} تولید و ذخیره شد.`,
+        });
       }
 
       setSynthesizingProgress({
         current: totalTurns,
         total: totalTurns,
-        message: 'میکس نهایی گفتار، موسیقی زمینه و افکت‌های صوتی...',
+        percent: 74,
+        message: 'گفتارها آماده شدند؛ در حال میکس موسیقی و افکت‌ها...',
       });
 
       // Mix voices + BGM + SFX into Master AudioBuffer
@@ -374,6 +373,7 @@ export default function App() {
         speedMultiplier: playbackRate,
       });
 
+      setSynthesizingProgress({ current: totalTurns, total: totalTurns, percent: 84, message: 'میکس انجام شد؛ در حال ساخت فایل MP3...' });
       setMasterAudioBuffer(masterBuf);
       setDuration(masterBuf.duration);
       setCurrentTime(0);
@@ -381,13 +381,16 @@ export default function App() {
       // Encode MP3 and WAV blobs for download and sharing
       const mp3 = encodeAudioBufferToMp3(masterBuf, 192);
       const wav = encodeAudioBufferToWav(masterBuf);
+      setSynthesizingProgress({ current: totalTurns, total: totalTurns, percent: 96, message: 'فایل‌ها آماده شدند؛ در حال ذخیره پروژه...' });
       setMp3Blob(mp3);
       setWavBlob(wav);
 
       // Auto save episode with duration
-      const updatedEpisode = { ...currentEpisode, durationSeconds: masterBuf.duration };
+      const updatedEpisode = { ...workingEpisode, durationSeconds: masterBuf.duration, projectStatus: 'completed' as const };
       setCurrentEpisode(updatedEpisode);
-      saveEpisodeToStorage(updatedEpisode);
+      await saveProject(updatedEpisode);
+      setSavedEpisodes((previous) => [updatedEpisode, ...previous.filter((item) => item.id !== updatedEpisode.id)]);
+      setSynthesizingProgress({ current: totalTurns, total: totalTurns, percent: 100, message: 'پروژه و فایل‌های خروجی ذخیره شدند.' });
 
       // Trigger Confetti Celebration!
       confetti({
@@ -404,7 +407,10 @@ export default function App() {
       startAudioPlayback(masterBuf, 0, playbackRate);
     } catch (err: any) {
       console.error('Synthesize & Mix error:', err);
-      alert('خطا در میکس پادکست: ' + (err.message || 'لطفاً دوباره تلاش کنید.'));
+      await saveProject(workingEpisode).catch((saveError) => console.error('Partial project save failed:', saveError));
+      setCurrentEpisode(workingEpisode);
+      setSynthesizingProgress((previous) => ({ ...previous, message: `کار متوقف شد؛ بخش‌های تکمیل‌شده ذخیره شدند. ${err.message || ''}` }));
+      alert('عملیات متوقف شد؛ بخش‌های تکمیل‌شده ذخیره شدند و می‌توانید بعداً ادامه دهید.\n' + (err.message || ''));
     } finally {
       setIsSynthesizingAudio(false);
     }
@@ -470,6 +476,11 @@ export default function App() {
   };
 
   const stopAudioPlayback = () => {
+    if (bgmPreviewSourceRef.current) {
+      try { bgmPreviewSourceRef.current.stop(); } catch (error) {}
+      bgmPreviewSourceRef.current = null;
+      bgmPreviewStyleRef.current = null;
+    }
     if (audioSourceRef.current) {
       try {
         audioSourceRef.current.stop();
@@ -482,6 +493,33 @@ export default function App() {
       animFrameRef.current = null;
     }
     setIsPlaying(false);
+  };
+
+  const handlePreviewBgm = (style: BgmStyle) => {
+    const ctx = getAudioContext();
+    if (bgmPreviewSourceRef.current) {
+      const sameStyle = bgmPreviewStyleRef.current === style;
+      try { bgmPreviewSourceRef.current.stop(); } catch (error) {}
+      bgmPreviewSourceRef.current = null;
+      bgmPreviewStyleRef.current = null;
+      if (sameStyle || style === 'none') return;
+    }
+    if (style === 'none') { showToast('برای این گزینه موسیقی پخش نمی‌شود.'); return; }
+    const preview = createSyntheticBgmBuffer(ctx, style, 18);
+    const source = ctx.createBufferSource();
+    source.buffer = preview;
+    source.loop = true;
+    source.connect(ctx.destination);
+    source.onended = () => {
+      if (bgmPreviewSourceRef.current === source) {
+        bgmPreviewSourceRef.current = null;
+        bgmPreviewStyleRef.current = null;
+      }
+    };
+    bgmPreviewSourceRef.current = source;
+    bgmPreviewStyleRef.current = style;
+    source.start();
+    showToast('پیش‌شنوی آفلاین موسیقی در حال پخش است؛ برای توقف دوباره بزنید.');
   };
 
   const handleTogglePlay = () => {
@@ -550,10 +588,12 @@ export default function App() {
             savedEpisodes={savedEpisodes}
             onSelectEpisode={(ep) => {
               setCurrentEpisode(ep);
-              setStudioStep('player');
+              setStudioStep('editor');
               setCurrentTab('studio');
-              // Automatically re-synthesize or load
-              handleSynthesizeAndPlay();
+              setMasterAudioBuffer(null);
+              setMp3Blob(null);
+              setWavBlob(null);
+              setSynthesizingProgress({ current: 0, total: ep.script.length, percent: 0, message: 'پروژه بازیابی شد؛ برای ادامه، تولید صوت را انتخاب کنید.' });
             }}
             onDeleteEpisode={handleDeleteSavedEpisode}
             onNewPodcast={() => {
@@ -567,6 +607,8 @@ export default function App() {
               <InputStep
                 onGenerate={handleGenerateScript}
                 isGenerating={isGeneratingScript}
+                scriptProgress={scriptProgress}
+                onPreviewBgm={handlePreviewBgm}
                 onOpenApiModal={() => setIsApiModalOpen(true)}
                 provider={aiProvider}
                 externalProviderName={externalConfig.name || 'سرویس خارجی'}
@@ -584,6 +626,7 @@ export default function App() {
                 onPreviewTurn={handlePreviewTurn}
                 previewingTurnId={previewingTurnId}
                 onOpenCoverModal={() => setIsCoverModalOpen(true)}
+                onPreviewBgm={handlePreviewBgm}
               />
             )}
 
