@@ -98,8 +98,8 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
       setHealthResult({ healthy: false, message: 'قبل از ذخیره، Base URL، کلید API و شناسه مدل را کامل کنید.' });
       return;
     }
-    if (localConfig.ttsProvider === 'google-cloud' && !localConfig.googleTtsApiKey?.trim()) {
-      setHealthResult({ healthy: false, message: 'برای Google Cloud TTS باید کلید API این سرویس را جداگانه وارد کنید.' });
+    if (localConfig.ttsProvider === 'google-gemini' && !localConfig.googleTtsApiKey?.trim() && !localConfig.apiKey?.trim()) {
+      setHealthResult({ healthy: false, message: 'برای Gemini TTS باید کلید Gemini API را وارد کنید.' });
       return;
     }
     const config = { ...localConfig, enabled: true };
@@ -192,25 +192,25 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
           <div className="space-y-1">
             <label htmlFor="tts-provider" className="text-xs font-semibold text-slate-300">ارائه‌دهنده گفتار</label>
             <select id="tts-provider" value={localConfig.ttsProvider || 'openai-compatible'}
-              onChange={(e) => setLocalConfig({ ...localConfig, ttsProvider: e.target.value as 'openai-compatible' | 'google-cloud' })}
+              onChange={(e) => setLocalConfig({ ...localConfig, ttsProvider: e.target.value as 'openai-compatible' | 'google-gemini' })}
               className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white">
               <option value="openai-compatible">OpenAI-compatible TTS</option>
-              <option value="google-cloud">Google Cloud Text-to-Speech</option>
+              <option value="google-gemini">Google Gemini TTS (فارسی)</option>
             </select>
           </div>
           {localConfig.ttsProvider === 'google-cloud' && (
             <>
               <div className="space-y-1">
-                <label htmlFor="google-tts-key" className="text-xs font-semibold text-slate-300">Google Cloud TTS API Key</label>
+                <label htmlFor="google-tts-key" className="text-xs font-semibold text-slate-300">کلید Gemini API برای TTS (اختیاری)</label>
                 <input id="google-tts-key" type="password" autoComplete="new-password"
                   value={localConfig.googleTtsApiKey || ''}
                   onChange={(e) => setLocalConfig({ ...localConfig, googleTtsApiKey: e.target.value })}
-                  placeholder="کلید API پروژه Google Cloud"
+                  placeholder="اگر خالی باشد، کلید بخش Gemini استفاده می‌شود"
                   className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label htmlFor="google-tts-language" className="text-xs font-semibold text-slate-300">کد زبان</label>
+                  <label htmlFor="google-tts-language" className="text-xs font-semibold text-slate-300">زبان ورودی</label>
                   <input id="google-tts-language" value={localConfig.googleTtsLanguageCode || 'fa-IR'}
                     onChange={(e) => setLocalConfig({ ...localConfig, googleTtsLanguageCode: e.target.value })}
                     className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
@@ -223,7 +223,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
                 </div>
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                Base URL ثابت: https://texttospeech.googleapis.com/v1/ — مسیر text:synthesize به‌صورت خودکار استفاده می‌شود. خروجی MP3 است. کلید این سرویس مستقل از کلید Gemini است.
+                مدل: gemini-3.8-flash-tts — API: https://generativelanguage.googleapis.com/v1beta/interactions — زبان فارسی به‌صورت خودکار تشخیص داده می‌شود. خروجی WAV است. کلید Gemini بخش بالا نیز قابل استفاده است.
               </p>
             </>
           )}
