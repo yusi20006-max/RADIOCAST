@@ -198,7 +198,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
               <option value="google-gemini">Google Gemini TTS (فارسی)</option>
             </select>
           </div>
-          {localConfig.ttsProvider === 'google-cloud' && (
+          {localConfig.ttsProvider === 'google-gemini' && (
             <>
               <div className="space-y-1">
                 <label htmlFor="google-tts-key" className="text-xs font-semibold text-slate-300">کلید Gemini API برای TTS (اختیاری)</label>
