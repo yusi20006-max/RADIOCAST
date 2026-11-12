@@ -115,7 +115,7 @@ export const InputStep: React.FC<InputStepProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 hover:bg-purple-900/50 border border-purple-500/40 text-purple-200 text-xs font-bold transition-all cursor-pointer"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{provider === 'google' ? 'Google AI Studio (Gemini 3.8 Flash)' : externalProviderName}</span>
+              <span>{externalProviderName || 'سرویس تنظیم‌نشده'}</span>
               <span className="text-[10px] text-purple-400 underline mr-1">تغییر یا تست سلامت API</span>
             </button>
           </div>
