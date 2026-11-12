@@ -76,6 +76,9 @@ export interface PodcastEpisode {
   coverArtUrl?: string;
   coverGradient?: string;
   episodeNumber?: number;
+  sourceText?: string;
+  projectStatus?: 'draft' | 'script-ready' | 'audio-in-progress' | 'completed';
+  lastUpdatedAt?: number;
 }
 
 export interface PodcastChannelInfo {
