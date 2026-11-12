@@ -167,6 +167,38 @@ export async function synthesizeSpeech(
   voiceName: string,
   speed: PlaybackSpeed,
 ): Promise<ArrayBuffer> {
+  if (config.ttsProvider === 'google-cloud') {
+    const apiKey = config.googleTtsApiKey?.trim();
+    if (!apiKey) throw new Error('کلید Google Cloud Text-to-Speech را در تنظیمات TTS وارد کنید.');
+    const endpoint = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(apiKey)}`;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: { text },
+        voice: {
+          languageCode: config.googleTtsLanguageCode?.trim() || 'fa-IR',
+          name: config.googleTtsVoice?.trim() || 'fa-IR-Standard-A',
+        },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate: SPEED_MAP[speed] || 1,
+        },
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`خطای Google Cloud TTS (${response.status}): ${await readApiError(response)}`);
+    }
+    const data = await response.json();
+    if (typeof data?.audioContent !== 'string' || !data.audioContent) {
+      throw new Error('Google Cloud TTS خروجی صوتی معتبری برنگرداند.');
+    }
+    const binary = atob(data.audioContent);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+  }
+
   assertConfig(config);
   const response = await fetch(getEndpoint(config, 'audio/speech'), {
     method: 'POST',
