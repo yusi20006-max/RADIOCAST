@@ -13,6 +13,10 @@ export interface ExternalProviderConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
+  ttsProvider?: 'openai-compatible' | 'google-cloud';
+  googleTtsApiKey?: string;
+  googleTtsVoice?: string;
+  googleTtsLanguageCode?: string;
   lastHealthCheck?: {
     healthy: boolean;
     timestamp: number;
