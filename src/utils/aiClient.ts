@@ -216,6 +216,10 @@ export async function synthesizeSpeech(
     const binary = atob(audioBase64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const hasWavHeader = bytes.length > 44 &&
+      bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+      bytes[8] === 0x57 && bytes[9] === 0x41 && bytes[10] === 0x56 && bytes[11] === 0x45;
+    if (!hasWavHeader) throw new Error('داده صوتی Gemini دریافت شد، اما فایل WAV معتبر نیست.');
     return bytes.buffer;
   }
 
