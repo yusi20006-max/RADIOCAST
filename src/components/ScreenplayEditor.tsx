@@ -334,7 +334,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
             {isSynthesizing ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>در حال تولید صوت ({synthesizingProgress.current}/{synthesizingProgress.total}) · {synthesizingProgress.percent.toLocaleString('fa-IR')}٪</span>
+                <span>در حال تولید صوت ({synthesizingProgress.current.toLocaleString('fa-IR')}/{synthesizingProgress.total.toLocaleString('fa-IR')}) · {synthesizingProgress.percent.toLocaleString('fa-IR')}٪</span>
               </>
             ) : (
               <>
