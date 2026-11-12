@@ -28,7 +28,9 @@ import {
   mixPodcastAudioBuffer,
   encodeAudioBufferToMp3,
   encodeAudioBufferToWav,
+  createSyntheticBgmBuffer,
 } from './utils/audioEngine';
+import { deleteProject, loadProjects, saveProject } from './utils/projectStorage';
 
 const STORAGE_KEY = 'radiocast_persian_podcasts_v1';
 const EXTERNAL_CONFIG_KEY = 'radiocast_external_ai_v1';
@@ -57,6 +59,7 @@ export default function App() {
 
   const [currentEpisode, setCurrentEpisode] = useState<PodcastEpisode | null>(null);
   const [savedEpisodes, setSavedEpisodes] = useState<PodcastEpisode[]>([]);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
 
   // AI provider settings are supplied and stored locally by the user.
   const [aiProvider, setAiProvider] = useState<AiProviderType>('external');
@@ -64,10 +67,12 @@ export default function App() {
   const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
 
   const [isGeneratingScript, setIsGeneratingScript] = useState<boolean>(false);
+  const [scriptProgress, setScriptProgress] = useState({ percent: 0, message: '' });
   const [isSynthesizingAudio, setIsSynthesizingAudio] = useState<boolean>(false);
   const [synthesizingProgress, setSynthesizingProgress] = useState({
     current: 0,
     total: 0,
+    percent: 0,
     message: '',
   });
 
@@ -91,17 +96,37 @@ export default function App() {
 
   // Audio Node references
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const bgmPreviewSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const startTimeRef = useRef<number>(0);
   const pauseOffsetRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
 
-  // Load saved episodes and external AI config from localStorage on mount
+  // Load projects from IndexedDB and migrate the previous localStorage archive once.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setSavedEpisodes(JSON.parse(stored));
+    let active = true;
+    (async () => {
+      try {
+        let projects = await loadProjects();
+        if (projects.length === 0) {
+          const legacy = localStorage.getItem(STORAGE_KEY);
+          if (legacy) {
+            const oldProjects = JSON.parse(legacy) as PodcastEpisode[];
+            for (const project of oldProjects) await saveProject(project);
+            projects = oldProjects;
+          }
+        }
+        if (active) setSavedEpisodes(projects);
+      } catch (error) {
+        console.error('Failed to load IndexedDB projects:', error);
+        try {
+          const legacy = localStorage.getItem(STORAGE_KEY);
+          if (legacy && active) setSavedEpisodes(JSON.parse(legacy));
+        } catch (legacyError) { console.error('Legacy project migration failed:', legacyError); }
+      } finally {
+        if (active) setProjectsLoaded(true);
       }
+    })();
+    try {
       const storedExt = localStorage.getItem(EXTERNAL_CONFIG_KEY);
       if (storedExt) {
         const parsedExt = { ...DEFAULT_EXTERNAL_CONFIG, ...JSON.parse(storedExt) };
@@ -121,6 +146,16 @@ export default function App() {
     }
   }, []);
 
+  // Autosave the active project after edits, including changes made in the screenplay editor.
+  useEffect(() => {
+    if (!projectsLoaded || !currentEpisode) return;
+    const timer = window.setTimeout(() => {
+      saveProject(currentEpisode).catch((error) => console.error('Project autosave failed:', error));
+      setSavedEpisodes((previous) => [currentEpisode, ...previous.filter((item) => item.id !== currentEpisode.id)]);
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [currentEpisode, projectsLoaded]);
+
   const handleSaveExternalConfig = (config: ExternalProviderConfig) => {
     setExternalConfig(config);
     try {
@@ -135,40 +170,34 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const saveEpisodeToStorage = (episode: PodcastEpisode) => {
+  const saveEpisodeToStorage = async (episode: PodcastEpisode) => {
     try {
-      const exists = savedEpisodes.some((e) => e.id === episode.id);
-      let updated: PodcastEpisode[];
-      if (exists) {
-        updated = savedEpisodes.map((e) => (e.id === episode.id ? episode : e));
-      } else {
-        updated = [episode, ...savedEpisodes];
-      }
-      setSavedEpisodes(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      showToast('اپیزود با موفقیت در آرشیو شما ذخیره شد.');
-    } catch (e) {
-      console.error('Failed to save episode:', e);
+      await saveProject({ ...episode, projectStatus: episode.projectStatus || 'completed' });
+      setSavedEpisodes((previous) => [episode, ...previous.filter((item) => item.id !== episode.id)]);
+      showToast('پروژه با موفقیت ذخیره شد.');
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      showToast('ذخیره پروژه انجام نشد؛ فضای ذخیره‌سازی دستگاه را بررسی کنید.');
     }
   };
 
-  const handleDeleteSavedEpisode = (id: string) => {
-    const updated = savedEpisodes.filter((e) => e.id !== id);
-    setSavedEpisodes(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    showToast('اپیزود از آرشیو حذف گردید.');
+  const handleDeleteSavedEpisode = async (id: string) => {
+    try {
+      await deleteProject(id);
+      setSavedEpisodes((previous) => previous.filter((episode) => episode.id !== id));
+      showToast('پروژه حذف شد.');
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      showToast('حذف پروژه انجام نشد.');
+    }
   };
 
-  const handleApplyCoverToEpisode = (coverUrl: string) => {
+  const handleApplyCoverToEpisode = async (coverUrl: string) => {
     if (currentEpisode) {
       const updated = { ...currentEpisode, coverArtUrl: coverUrl };
       setCurrentEpisode(updated);
-      const exists = savedEpisodes.some((e) => e.id === updated.id);
-      if (exists) {
-        const newSaved = savedEpisodes.map((e) => (e.id === updated.id ? updated : e));
-        setSavedEpisodes(newSaved);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaved));
-      }
+      await saveProject(updated);
+      setSavedEpisodes((previous) => [updated, ...previous.filter((item) => item.id !== updated.id)]);
       showToast('کاور آرت با موفقیت روی اپیزود تنظیم گردید.');
     }
   };
@@ -189,10 +218,14 @@ export default function App() {
   }) => {
     try {
       setIsGeneratingScript(true);
-      const data = await generatePodcastScript(externalConfig, params);
+      setScriptProgress({ percent: 8, message: 'در حال آماده‌سازی درخواست سناریو...' });
+      const data = await generatePodcastScript(externalConfig, params, (percent, message) => setScriptProgress({ percent, message }));
+      setScriptProgress({ percent: 94, message: 'سناریو استخراج شد؛ در حال ذخیره پروژه...' });
       const newEpisode: PodcastEpisode = {
         id: 'ep-' + Date.now(),
         createdAt: Date.now(),
+        sourceText: params.sourceText,
+        projectStatus: 'script-ready',
         title: data.title || 'اپیزود جدید رادیو کست',
         episodeSummary: data.episodeSummary || '',
         genre: data.genre || 'عمومی',
@@ -218,11 +251,15 @@ export default function App() {
         coverGradient: 'from-purple-900 via-indigo-900 to-slate-900',
       };
 
+      await saveProject(newEpisode);
+      setSavedEpisodes((previous) => [newEpisode, ...previous.filter((item) => item.id !== newEpisode.id)]);
       setCurrentEpisode(newEpisode);
+      setScriptProgress({ percent: 100, message: 'سناریو با موفقیت ذخیره شد.' });
       setStudioStep('editor');
-      showToast('سناریوی پادکست با سرویس انتخابی تولید شد. اکنون می‌توانید متن را بررسی کنید.');
+      showToast('سناریو ساخته و به‌عنوان پروژه ذخیره شد.');
     } catch (error: any) {
       console.error('Script generation failed:', error);
+      setScriptProgress({ percent: 0, message: error.message || 'ساخت سناریو ناموفق بود.' });
       alert(error.message || 'خطا در تولید سناریوی پادکست.');
     } finally {
       setIsGeneratingScript(false);
