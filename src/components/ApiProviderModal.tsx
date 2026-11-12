@@ -187,7 +187,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
             سرویس مستقل تولید گفتار (TTS)
           </div>
           <p className="text-xs text-slate-400 leading-relaxed">
-            موتور تولید متن و موتور گفتار جدا هستند. برای استفاده از Gemini در تولید متن، می‌توانید Google Cloud TTS را برای ساخت فایل صوتی انتخاب کنید.
+            موتور تولید متن و موتور گفتار جدا هستند. برای ساخت فایل صوتی با Gemini، از مدل مستقل Gemini Flash-Lite TTS استفاده می‌شود.
           </p>
           <div className="space-y-1">
             <label htmlFor="tts-provider" className="text-xs font-semibold text-slate-300">ارائه‌دهنده گفتار</label>
@@ -216,7 +216,7 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
                   className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                مدل: gemini-3.8-flash-tts — API: https://generativelanguage.googleapis.com/v1beta/interactions — زبان فارسی به‌صورت خودکار تشخیص داده می‌شود. خروجی WAV است. کلید Gemini بخش بالا نیز قابل استفاده است.
+                مدل: gemini-3.8-flash-lite-tts — API: https://generativelanguage.googleapis.com/v1beta/interactions — زبان فارسی به‌صورت خودکار تشخیص داده می‌شود. خروجی WAV است. کلید Gemini بخش بالا نیز قابل استفاده است.
               </p>
             </>
           )}
