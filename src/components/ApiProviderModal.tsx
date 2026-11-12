@@ -208,19 +208,12 @@ export const ApiProviderModal: React.FC<ApiProviderModalProps> = ({
                   placeholder="اگر خالی باشد، کلید بخش Gemini استفاده می‌شود"
                   className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label htmlFor="google-tts-language" className="text-xs font-semibold text-slate-300">زبان ورودی</label>
-                  <input id="google-tts-language" value={localConfig.googleTtsLanguageCode || 'fa-IR'}
-                    onChange={(e) => setLocalConfig({ ...localConfig, googleTtsLanguageCode: e.target.value })}
-                    className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
-                </div>
-                <div className="space-y-1">
-                  <label htmlFor="google-tts-voice" className="text-xs font-semibold text-slate-300">نام صدا (Voice name)</label>
-                  <input id="google-tts-voice" value={localConfig.googleTtsVoice || 'fa-IR-Standard-A'}
-                    onChange={(e) => setLocalConfig({ ...localConfig, googleTtsVoice: e.target.value })}
-                    className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
-                </div>
+              <div className="space-y-1">
+                <label htmlFor="google-tts-voice" className="text-xs font-semibold text-slate-300">نام صدای Gemini</label>
+                <input id="google-tts-voice" value={localConfig.googleTtsVoice || 'Kore'}
+                  onChange={(e) => setLocalConfig({ ...localConfig, googleTtsVoice: e.target.value })}
+                  placeholder="Kore"
+                  className="w-full min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white font-mono" dir="ltr" />
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed">
                 مدل: gemini-3.8-flash-tts — API: https://generativelanguage.googleapis.com/v1beta/interactions — زبان فارسی به‌صورت خودکار تشخیص داده می‌شود. خروجی WAV است. کلید Gemini بخش بالا نیز قابل استفاده است.
