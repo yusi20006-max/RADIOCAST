@@ -5,7 +5,7 @@ export type PlaybackSpeed = 'slow' | 'normal' | 'fast' | 'veryFast';
 export type BgmStyle = 'lofi' | 'ambient' | 'acoustic' | 'cinematic' | 'iranian-fusion' | 'none';
 export type SfxType = 'intro' | 'transition' | 'ding' | 'laugh' | 'applause' | 'outro' | 'none';
 
-export type AiProviderType = 'google' | 'external';
+export type AiProviderType = 'external';
 
 export interface ExternalProviderConfig {
   enabled: boolean;
