@@ -13,7 +13,7 @@ export interface ExternalProviderConfig {
   baseUrl: string;
   apiKey: string;
   model: string;
-  ttsProvider?: 'openai-compatible' | 'google-cloud';
+  ttsProvider?: 'openai-compatible' | 'google-gemini';
   googleTtsApiKey?: string;
   googleTtsVoice?: string;
   googleTtsLanguageCode?: string;
