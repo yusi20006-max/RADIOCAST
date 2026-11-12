@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 300" role="img" aria-labelledby="title desc">
+<title id="title">RADIOCAST — Smart Podcast with AI</title><desc id="desc">AI-powered podcast studio with a microphone, sound waves, and smart creation features.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07152f"/><stop offset=".5" stop-color="#10164b"/><stop offset="1" stop-color="#210d42"/></linearGradient>
+ <linearGradient id="neon" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#fb923c"/></linearGradient>
+ <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fff"/><stop offset=".66" stop-color="#dbeafe"/><stop offset="1" stop-color="#fbbf24"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="1600" height="300" rx="38" fill="url(#bg)"/>
+<rect x="5" y="5" width="1590" height="290" rx="34" fill="none" stroke="url(#neon)" stroke-width="5"/>
+<path d="M0 214q180-140 360 0t360 0t360 0t520-8" fill="none" stroke="url(#neon)" stroke-width="5" opacity=".45" filter="url(#blur)"/>
+<g transform="translate(35 22) scale(.5)"><rect width="512" height="512" rx="92" fill="#0b1740" stroke="url(#neon)" stroke-width="10"/><path d="M160 198v-30a96 96 0 0 1 192 0v30" fill="none" stroke="url(#neon)" stroke-width="20" stroke-linecap="round"/><rect x="115" y="190" width="60" height="120" rx="28" fill="#102c68" stroke="#22d3ee" stroke-width="9"/><rect x="337" y="190" width="60" height="120" rx="28" fill="#102c68" stroke="#fb923c" stroke-width="9"/><rect x="205" y="112" width="102" height="220" rx="50" fill="#dbeafe" stroke="#fff" stroke-width="7"/><path d="M228 165h56m-56 32h56m-56 32h56m-56 32h56" stroke="#27366f" stroke-width="11" stroke-linecap="round"/><path d="M180 258v20a76 76 0 0 0 152 0v-20m-76 96v24m-48 0h96" fill="none" stroke="#dbeafe" stroke-width="12" stroke-linecap="round"/><rect x="198" y="382" width="116" height="70" rx="18" fill="#101d56" stroke="#22d3ee" stroke-width="8"/><text x="256" y="430" font-family="Arial" font-size="46" font-weight="bold" text-anchor="middle" fill="white">AI</text></g>
+<g fill="none" stroke="url(#neon)" stroke-linecap="round" stroke-width="7" opacity=".9"><path d="M320 80v28m22-48v68m22-44v24m22-58v92m22-56v20m22-40v60"/></g>
+<text x="430" y="135" font-family="Arial,sans-serif" font-size="88" font-weight="900" letter-spacing="2" fill="url(#word)">RADIOCAST</text>
+<text x="438" y="190" font-family="Arial,sans-serif" font-size="34" font-weight="600" fill="#dbeafe">Smart Podcast with AI</text>
+<text x="438" y="238" font-family="Arial,sans-serif" font-size="23" fill="#a5b4fc">Create  ·  Generate  ·  Listen  ·  Share</text>
+<g transform="translate(1110 65)" font-family="Arial,sans-serif" text-anchor="middle">
+ <g fill="none" stroke="#38bdf8" stroke-width="5"><path d="M30 26h38m-19-19v38m-29-19 29-19 29 19-29 19z"/></g><text x="49" y="92" fill="#e0e7ff" font-size="20">AI Script</text>
+ <g transform="translate(130 0)" fill="none" stroke="#a78bfa" stroke-width="7" stroke-linecap="round"><path d="M0 28v22m18-40v58m18-42v26m18-38v50m18-35v20"/></g><text x="168" y="92" fill="#e0e7ff" font-size="20">Voice</text>
+ <g transform="translate(275 0)" fill="none" stroke="#fbbf24" stroke-width="6"><path d="M4 18v40l42-24V-4zM4 58q-14 18-30 0"/></g><text x="290" y="92" fill="#e0e7ff" font-size="20">Music</text>
+ <g transform="translate(410 0)" fill="none" stroke="#fb923c" stroke-width="6" stroke-linecap="round"><path d="M0 30q20-30 40 0t40 0M40 8v44"/></g><text x="450" y="92" fill="#e0e7ff" font-size="20">Share</text>
+</g>
+</svg>
