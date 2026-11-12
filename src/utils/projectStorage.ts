@@ -23,7 +23,7 @@ export async function loadProjects(): Promise<PodcastEpisode[]> {
     const request = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAll();
     request.onsuccess = () => {
       db.close();
-      resolve((request.result as PodcastEpisode[]).sort((a, b) => b.createdAt - a.createdAt));
+      resolve((request.result as PodcastEpisode[]).sort((a, b) => (b.lastUpdatedAt || b.createdAt) - (a.lastUpdatedAt || a.createdAt)));
     };
     request.onerror = () => {
       db.close();
