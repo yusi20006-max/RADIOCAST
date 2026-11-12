@@ -177,7 +177,7 @@ export async function synthesizeSpeech(
         'x-goog-api-key': apiKey,
       },
       body: JSON.stringify({
-        model: 'gemini-3.8-flash-tts',
+        model: 'gemini-3.8-flash-lite-tts',
         input: [{
           type: 'user_input',
           content: [{
@@ -189,7 +189,7 @@ export async function synthesizeSpeech(
             }],
           }],
         }],
-        response_format: { type: 'audio' },
+        response_format: { type: 'audio', mime_type: 'audio/wav' },
         generation_config: {
           speech_config: [{ voice: config.googleTtsVoice?.trim() || 'Kore' }],
         },
@@ -199,9 +199,14 @@ export async function synthesizeSpeech(
       throw new Error(`خطای Gemini TTS (${response.status}): ${await readApiError(response)}`);
     }
     const data = await response.json();
-    const audioBase64 = data?.output_audio?.data;
+    // Raw REST Interactions responses place audio in steps[].content[].data.
+    // output_audio is an SDK convenience property, not a guaranteed REST field.
+    const audioBase64 = data?.output_audio?.data ||
+      [...(data?.steps || [])].reverse()
+        .flatMap((step: any) => step?.content || [])
+        .find((item: any) => item?.type === 'audio' && typeof item?.data === 'string')?.data;
     if (typeof audioBase64 !== 'string' || !audioBase64) {
-      throw new Error('Gemini TTS خروجی صوتی معتبری برنگرداند.');
+      throw new Error('پاسخ Gemini دریافت شد، اما داده صوتی در steps[].content[].data وجود نداشت.');
     }
     const binary = atob(audioBase64);
     const bytes = new Uint8Array(binary.length);
