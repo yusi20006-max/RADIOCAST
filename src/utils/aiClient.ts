@@ -38,8 +38,10 @@ async function chatCompletion(
   config: ExternalProviderConfig,
   messages: ChatMessage[],
   maxTokens = 4096,
+  onProgress?: (percent: number, message: string) => void,
 ): Promise<string> {
   assertConfig(config);
+  onProgress?.(20, 'در حال ارسال درخواست به مدل...');
   const response = await fetch(getEndpoint(config, 'chat/completions'), {
     method: 'POST',
     headers: {
@@ -54,7 +56,9 @@ async function chatCompletion(
     }),
   });
   if (!response.ok) throw new Error(`خطای سرویس AI (${response.status}): ${await readApiError(response)}`);
+  onProgress?.(72, 'ارتباط برقرار شد؛ در حال دریافت پاسخ مدل...');
   const data = await response.json();
+  onProgress?.(88, 'پاسخ دریافت شد؛ در حال استخراج سناریو...');
   const content = data?.choices?.[0]?.message?.content;
   if (typeof content !== 'string' || !content.trim()) {
     throw new Error('پاسخ سرویس AI خالی یا با قالب ناشناخته بود.');
@@ -85,6 +89,7 @@ export async function generatePodcastScript(
     durationTarget: string;
     dynamicToneEnabled: boolean;
   },
+  onProgress?: (percent: number, message: string) => void,
 ): Promise<any> {
   const formatNames: Record<string, string> = {
     dual: 'گفتگوی دو نفره',
@@ -127,7 +132,7 @@ ${params.sourceText}
   const raw = await chatCompletion(config, [
     { role: 'system', content: 'You generate valid JSON podcast scripts. Never wrap JSON in Markdown.' },
     { role: 'user', content: prompt },
-  ], 6000);
+  ], 6000, onProgress);
   const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   const firstBrace = cleaned.indexOf('{');
   const lastBrace = cleaned.lastIndexOf('}');
