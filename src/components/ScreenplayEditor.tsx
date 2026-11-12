@@ -30,6 +30,7 @@ interface ScreenplayEditorProps {
   onPreviewTurn: (turn: DialogueTurn) => void;
   previewingTurnId: string | null;
   onOpenCoverModal?: () => void;
+  onPreviewBgm: (style: BgmStyle) => void;
 }
 
 export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
@@ -42,6 +43,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
   onPreviewTurn,
   previewingTurnId,
   onOpenCoverModal,
+  onPreviewBgm,
 }) => {
   const [refiningTurnId, setRefiningTurnId] = useState<string | null>(null);
   const [refineInstruction, setRefineInstruction] = useState<string>('');
@@ -297,6 +299,9 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
                   </option>
                 ))}
               </select>
+              <button type="button" onClick={() => onPreviewBgm(episode.suggestedBgm)} className="rounded-lg border border-pink-500/30 bg-pink-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-pink-300 hover:bg-pink-500/20">
+                <span className="flex items-center gap-1"><Play className="h-3 w-3" /> پیش‌شنوی آفلاین</span>
+              </button>
             </div>
 
             {/* BGM Volume */}
@@ -329,7 +334,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
             {isSynthesizing ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>در حال ساخت صوت ({synthesizingProgress.current}/{synthesizingProgress.total})...</span>
+                <span>در حال تولید صوت ({synthesizingProgress.current}/{synthesizingProgress.total}) · {synthesizingProgress.percent.toLocaleString('fa-IR')}٪</span>
               </>
             ) : (
               <>
@@ -347,16 +352,14 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
               <div
                 className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-300"
                 style={{
-                  width: `${Math.round(
-                    (synthesizingProgress.current / Math.max(1, synthesizingProgress.total)) * 100
-                  )}%`,
+                  width: `${synthesizingProgress.percent}%`,
                 }}
               />
             </div>
             <div className="flex justify-between text-[11px] text-slate-400">
               <span>{synthesizingProgress.message}</span>
               <span>
-                {Math.round((synthesizingProgress.current / Math.max(1, synthesizingProgress.total)) * 100)}%
+                {synthesizingProgress.percent.toLocaleString('fa-IR')}٪
               </span>
             </div>
           </div>
