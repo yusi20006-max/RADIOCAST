@@ -167,33 +167,43 @@ export async function synthesizeSpeech(
   voiceName: string,
   speed: PlaybackSpeed,
 ): Promise<ArrayBuffer> {
-  if (config.ttsProvider === 'google-cloud') {
-    const apiKey = config.googleTtsApiKey?.trim();
-    if (!apiKey) throw new Error('کلید Google Cloud Text-to-Speech را در تنظیمات TTS وارد کنید.');
-    const endpoint = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(apiKey)}`;
-    const response = await fetch(endpoint, {
+  if (config.ttsProvider === 'google-gemini') {
+    const apiKey = config.googleTtsApiKey?.trim() || config.apiKey.trim();
+    if (!apiKey) throw new Error('کلید Gemini API را در تنظیمات هوش مصنوعی وارد کنید.');
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
       body: JSON.stringify({
-        input: { text },
-        voice: {
-          languageCode: config.googleTtsLanguageCode?.trim() || 'fa-IR',
-          name: config.googleTtsVoice?.trim() || 'fa-IR-Standard-A',
-        },
-        audioConfig: {
-          audioEncoding: 'MP3',
-          speakingRate: SPEED_MAP[speed] || 1,
+        model: 'gemini-3.8-flash-tts',
+        input: [{
+          type: 'user_input',
+          content: [{
+            type: 'text',
+            text,
+            annotations: [{
+              type: 'speech_metadata',
+              style: 'Natural, clear Persian podcast narration with expressive but restrained delivery.',
+            }],
+          }],
+        }],
+        response_format: { type: 'audio' },
+        generation_config: {
+          speech_config: [{ voice: config.googleTtsVoice?.trim() || 'Kore' }],
         },
       }),
     });
     if (!response.ok) {
-      throw new Error(`خطای Google Cloud TTS (${response.status}): ${await readApiError(response)}`);
+      throw new Error(`خطای Gemini TTS (${response.status}): ${await readApiError(response)}`);
     }
     const data = await response.json();
-    if (typeof data?.audioContent !== 'string' || !data.audioContent) {
-      throw new Error('Google Cloud TTS خروجی صوتی معتبری برنگرداند.');
+    const audioBase64 = data?.output_audio?.data;
+    if (typeof audioBase64 !== 'string' || !audioBase64) {
+      throw new Error('Gemini TTS خروجی صوتی معتبری برنگرداند.');
     }
-    const binary = atob(data.audioContent);
+    const binary = atob(audioBase64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes.buffer;
