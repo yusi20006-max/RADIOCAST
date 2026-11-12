@@ -9,6 +9,7 @@ import { LibraryView } from './components/LibraryView';
 import { GuideModal } from './components/GuideModal';
 import { ApiProviderModal } from './components/ApiProviderModal';
 import { CoverArtGeneratorModal } from './components/CoverArtGeneratorModal';
+import { generatePodcastScript, synthesizeSpeech } from './utils/aiClient';
 import { RssFeedModal } from './components/RssFeedModal';
 import { ExportAppModal } from './components/ExportAppModal';
 import {
@@ -35,11 +36,21 @@ const EXTERNAL_CONFIG_KEY = 'radiocast_external_ai_v1';
 
 const DEFAULT_EXTERNAL_CONFIG: ExternalProviderConfig = {
   enabled: false,
-  name: 'OpenAI',
-  baseUrl: 'https://api.openai.com/v1',
+  name: '',
+  baseUrl: '',
   apiKey: '',
-  model: 'gpt-4o-mini',
+  model: '',
 };
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'studio' | 'library'>('studio');
@@ -49,7 +60,7 @@ export default function App() {
   const [savedEpisodes, setSavedEpisodes] = useState<PodcastEpisode[]>([]);
 
   // AI Provider states (Google AI Studio as primary, optional external API)
-  const [aiProvider, setAiProvider] = useState<AiProviderType>('google');
+  const [aiProvider, setAiProvider] = useState<AiProviderType>('external');
   const [externalConfig, setExternalConfig] = useState<ExternalProviderConfig>(DEFAULT_EXTERNAL_CONFIG);
   const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
 
@@ -157,7 +168,7 @@ export default function App() {
     }
   };
 
-  // Step 1: Generate Script via Gemini 3.8 Flash (Primary) or External LLM
+  // Generate a podcast script directly through the user's configured OpenAI-compatible API.
   const handleGenerateScript = async (params: {
     sourceText: string;
     format: PodcastFormat;
@@ -173,23 +184,7 @@ export default function App() {
   }) => {
     try {
       setIsGeneratingScript(true);
-      const res = await fetch('/api/podcast/generate-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...params,
-          aiProvider,
-          externalConfig: aiProvider === 'external' ? externalConfig : undefined,
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'خطا در ارتباط با سرور هوش مصنوعی.');
-      }
-
-      const data = await res.json();
-
+      const data = await generatePodcastScript(externalConfig, params);
       const newEpisode: PodcastEpisode = {
         id: 'ep-' + Date.now(),
         createdAt: Date.now(),
@@ -206,11 +201,13 @@ export default function App() {
         host2Voice: params.host2Voice,
         suggestedBgm: data.suggestedBgm || params.bgmStyle,
         bgmVolume: 0.35,
-        tags: data.tags || ['پادکست_فارسی', 'هوش_مصنوعی'],
-        chapters: data.chapters || [{ title: 'مقدمه', startTurnIndex: 0 }],
-        script: (data.script || []).map((t: any, idx: number) => ({
+        tags: Array.isArray(data.tags) ? data.tags : ['پادکست_فارسی', 'هوش_مصنوعی'],
+        chapters: Array.isArray(data.chapters) ? data.chapters : [{ title: 'مقدمه', startTurnIndex: 0 }],
+        script: data.script.map((t: any, idx: number) => ({
           ...t,
           id: 'turn-' + idx + '-' + Date.now(),
+          speaker: t.speaker === 'host2' ? 'host2' : 'host1',
+          speakerName: t.speakerName || (t.speaker === 'host2' ? params.host2Name : params.host1Name),
           turnTone: t.turnTone || (t.text?.includes('؟') ? 'curious' : t.text?.includes('!') ? 'excited' : 'friendly'),
         })),
         coverGradient: 'from-purple-900 via-indigo-900 to-slate-900',
@@ -218,69 +215,43 @@ export default function App() {
 
       setCurrentEpisode(newEpisode);
       setStudioStep('editor');
-      showToast('سناریوی پادکست آماده شد! می‌توانید متن‌ها را بررسی کنید.');
+      showToast('سناریوی پادکست با سرویس انتخابی تولید شد. اکنون می‌توانید متن را بررسی کنید.');
     } catch (error: any) {
       console.error('Script generation failed:', error);
-      alert(error.message || 'خطا در تولید سناریوی پادکست. لطفاً اتصال اینترنت خود را بررسی کنید.');
+      alert(error.message || 'خطا در تولید سناریوی پادکست.');
     } finally {
       setIsGeneratingScript(false);
     }
   };
 
-  // Preview a single turn
+  // Preview one dialogue turn using the configured provider's speech endpoint.
   const handlePreviewTurn = async (turn: DialogueTurn) => {
     if (!currentEpisode) return;
     setPreviewingTurnId(turn.id);
-
     try {
-      const voice = turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice;
       let base64 = turn.audioBase64;
-
       if (!base64) {
-        const res = await fetch('/api/podcast/synthesize-turn', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: turn.text,
-            voiceName: voice,
-            style: turn.speechStyle,
-            speed: currentEpisode.speed,
-            turnTone: turn.turnTone || 'auto',
-          }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          base64 = data.audioBase64;
-          // Cache in turn
-          turn.audioBase64 = base64;
-        }
+        const audioData = await synthesizeSpeech(externalConfig, turn.text,
+          turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice,
+          currentEpisode.speed);
+        base64 = arrayBufferToBase64(audioData);
+        turn.audioBase64 = base64;
       }
-
       const ctx = getAudioContext();
-      if (base64) {
-        const buf = await decodeAudioBase64(base64, ctx);
-        const source = ctx.createBufferSource();
-        source.buffer = buf;
-        source.connect(ctx.destination);
-        source.start();
-      } else {
-        // Fallback Web Speech
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utter = new SpeechSynthesisUtterance(turn.text);
-          utter.lang = 'fa-IR';
-          window.speechSynthesis.speak(utter);
-        }
-      }
-    } catch (e) {
+      const buf = await decodeAudioBase64(base64, ctx);
+      const source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.connect(ctx.destination);
+      source.start();
+    } catch (e: any) {
       console.error('Preview error:', e);
-      // Fallback Web Speech
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(turn.text);
         utter.lang = 'fa-IR';
         window.speechSynthesis.speak(utter);
+      } else {
+        alert(e.message || 'پیش‌نمایش صدا در دسترس نیست.');
       }
     } finally {
       setTimeout(() => setPreviewingTurnId(null), 1500);
@@ -314,47 +285,13 @@ export default function App() {
         const voice = turn.speaker === 'host1' ? currentEpisode.host1Voice : currentEpisode.host2Voice;
 
         if (!base64) {
-          try {
-            const res = await fetch('/api/podcast/synthesize-turn', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                text: turn.text,
-                voiceName: voice,
-                style: turn.speechStyle,
-                speed: currentEpisode.speed,
-                turnTone: turn.turnTone || 'auto',
-              }),
-            });
-
-            if (res.ok) {
-              const data = await res.json();
-              base64 = data.audioBase64;
-              turn.audioBase64 = base64;
-            }
-          } catch (turnErr) {
-            console.warn('API TTS failed for turn, generating synthetic placeholder buffer', turnErr);
-          }
+          const audioData = await synthesizeSpeech(externalConfig, turn.text, voice, currentEpisode.speed);
+          base64 = arrayBufferToBase64(audioData);
+          turn.audioBase64 = base64;
         }
 
-        let audioBuf: AudioBuffer;
-        if (base64) {
-          audioBuf = await decodeAudioBase64(base64, ctx);
-        } else {
-          // Synthetic procedural speech proxy buffer based on text length
-          const estimatedDuration = Math.max(2.5, turn.text.length * 0.08);
-          audioBuf = ctx.createBuffer(2, Math.floor(ctx.sampleRate * estimatedDuration), ctx.sampleRate);
-          const ch0 = audioBuf.getChannelData(0);
-          const ch1 = audioBuf.getChannelData(1);
-          const baseFreq = turn.speaker === 'host1' ? 140 : 210;
-          for (let s = 0; s < ch0.length; s++) {
-            const t = s / ctx.sampleRate;
-            const formant = Math.sin(2 * Math.PI * baseFreq * t) * 0.15;
-            const mod = 0.5 + 0.5 * Math.sin(t * 12);
-            ch0[s] = formant * mod;
-            ch1[s] = formant * mod;
-          }
-        }
+        // Never substitute synthetic tones for speech: fail clearly if real TTS is unavailable.
+        const audioBuf = await decodeAudioBase64(base64, ctx);
 
         voiceBuffers.push({ buffer: audioBuf, sfxCue: turn.sfxCue });
       }
