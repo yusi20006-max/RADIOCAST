@@ -598,6 +598,7 @@ export default function App() {
                 onGenerate={handleGenerateScript}
                 isGenerating={isGeneratingScript}
                 scriptProgress={scriptProgress}
+                onPreviewBgm={handlePreviewBgm}
                 onOpenApiModal={() => setIsApiModalOpen(true)}
                 provider={aiProvider}
                 externalProviderName={externalConfig.name || 'سرویس خارجی'}
