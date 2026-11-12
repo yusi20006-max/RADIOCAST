@@ -97,6 +97,7 @@ export default function App() {
   // Audio Node references
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const bgmPreviewSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const bgmPreviewStyleRef = useRef<BgmStyle | null>(null);
   const startTimeRef = useRef<number>(0);
   const pauseOffsetRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
@@ -478,6 +479,7 @@ export default function App() {
     if (bgmPreviewSourceRef.current) {
       try { bgmPreviewSourceRef.current.stop(); } catch (error) {}
       bgmPreviewSourceRef.current = null;
+      bgmPreviewStyleRef.current = null;
     }
     if (audioSourceRef.current) {
       try {
@@ -496,9 +498,11 @@ export default function App() {
   const handlePreviewBgm = (style: BgmStyle) => {
     const ctx = getAudioContext();
     if (bgmPreviewSourceRef.current) {
+      const sameStyle = bgmPreviewStyleRef.current === style;
       try { bgmPreviewSourceRef.current.stop(); } catch (error) {}
       bgmPreviewSourceRef.current = null;
-      return;
+      bgmPreviewStyleRef.current = null;
+      if (sameStyle || style === 'none') return;
     }
     if (style === 'none') { showToast('برای این گزینه موسیقی پخش نمی‌شود.'); return; }
     const preview = createSyntheticBgmBuffer(ctx, style, 18);
@@ -506,8 +510,14 @@ export default function App() {
     source.buffer = preview;
     source.loop = true;
     source.connect(ctx.destination);
-    source.onended = () => { if (bgmPreviewSourceRef.current === source) bgmPreviewSourceRef.current = null; };
+    source.onended = () => {
+      if (bgmPreviewSourceRef.current === source) {
+        bgmPreviewSourceRef.current = null;
+        bgmPreviewStyleRef.current = null;
+      }
+    };
     bgmPreviewSourceRef.current = source;
+    bgmPreviewStyleRef.current = style;
     source.start();
     showToast('پیش‌شنوی آفلاین موسیقی در حال پخش است؛ برای توقف دوباره بزنید.');
   };
