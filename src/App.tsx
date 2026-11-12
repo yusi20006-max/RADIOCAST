@@ -28,7 +28,6 @@ import {
   mixPodcastAudioBuffer,
   encodeAudioBufferToMp3,
   encodeAudioBufferToWav,
-  createSyntheticSfx,
 } from './utils/audioEngine';
 
 const STORAGE_KEY = 'radiocast_persian_podcasts_v1';
@@ -59,7 +58,7 @@ export default function App() {
   const [currentEpisode, setCurrentEpisode] = useState<PodcastEpisode | null>(null);
   const [savedEpisodes, setSavedEpisodes] = useState<PodcastEpisode[]>([]);
 
-  // AI Provider states (Google AI Studio as primary, optional external API)
+  // AI provider settings are supplied and stored locally by the user.
   const [aiProvider, setAiProvider] = useState<AiProviderType>('external');
   const [externalConfig, setExternalConfig] = useState<ExternalProviderConfig>(DEFAULT_EXTERNAL_CONFIG);
   const [isApiModalOpen, setIsApiModalOpen] = useState<boolean>(false);
@@ -105,7 +104,13 @@ export default function App() {
       }
       const storedExt = localStorage.getItem(EXTERNAL_CONFIG_KEY);
       if (storedExt) {
-        const parsedExt = JSON.parse(storedExt);
+        const parsedExt = { ...DEFAULT_EXTERNAL_CONFIG, ...JSON.parse(storedExt) };
+        if (!parsedExt.apiKey?.trim()) {
+          parsedExt.name = '';
+          parsedExt.baseUrl = '';
+          parsedExt.model = '';
+          parsedExt.enabled = false;
+        }
         setExternalConfig(parsedExt);
         if (parsedExt.enabled) {
           setAiProvider('external');
