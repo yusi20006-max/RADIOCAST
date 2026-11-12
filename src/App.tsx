@@ -309,7 +309,8 @@ export default function App() {
 
     setIsSynthesizingAudio(true);
     const totalTurns = currentEpisode.script.length;
-    setSynthesizingProgress({ current: 0, total: totalTurns, message: 'آغاز پردازش استودیو...' });
+    setSynthesizingProgress({ current: 0, total: totalTurns, percent: 0, message: 'آغاز پردازش پروژه...' });
+    let workingEpisode: PodcastEpisode = { ...currentEpisode, projectStatus: 'audio-in-progress' };
 
     const ctx = getAudioContext();
     const voiceBuffers: { buffer: AudioBuffer; sfxCue?: any }[] = [];
@@ -317,10 +318,14 @@ export default function App() {
     try {
       for (let i = 0; i < totalTurns; i++) {
         const turn = currentEpisode.script[i];
+        const cachedAudio = Boolean(turn.audioBase64);
         setSynthesizingProgress({
-          current: i + 1,
+          current: i,
           total: totalTurns,
-          message: `در حال تولید صدای ${turn.speakerName} (${i + 1} از ${totalTurns})...`,
+          percent: Math.round((i / Math.max(1, totalTurns)) * 70),
+          message: cachedAudio
+            ? `بخش ${i + 1} از ${totalTurns} آماده است؛ در حال بازیابی فایل ذخیره‌شده...`
+            : `در حال تولید صوت گوینده ${turn.speakerName}؛ بخش ${i + 1} از ${totalTurns}`,
         });
 
         let base64 = turn.audioBase64;
@@ -329,19 +334,33 @@ export default function App() {
         if (!base64) {
           const audioData = await synthesizeSpeech(externalConfig, turn.text, voice, currentEpisode.speed);
           base64 = arrayBufferToBase64(audioData);
-          turn.audioBase64 = base64;
         }
+
+        // Persist every completed speech segment. Retries skip cached segments.
+        const updatedScript = workingEpisode.script.map((item) =>
+          item.id === turn.id ? { ...item, audioBase64: base64 } : item
+        );
+        workingEpisode = { ...workingEpisode, script: updatedScript, projectStatus: 'audio-in-progress' };
+        setCurrentEpisode(workingEpisode);
+        await saveProject(workingEpisode);
 
         // Never substitute synthetic tones for speech: fail clearly if real TTS is unavailable.
         const audioBuf = await decodeAudioBase64(base64, ctx);
 
         voiceBuffers.push({ buffer: audioBuf, sfxCue: turn.sfxCue });
+        setSynthesizingProgress({
+          current: i + 1,
+          total: totalTurns,
+          percent: Math.round(((i + 1) / Math.max(1, totalTurns)) * 70),
+          message: `صوت بخش ${i + 1} از ${totalTurns} تولید و ذخیره شد.`,
+        });
       }
 
       setSynthesizingProgress({
         current: totalTurns,
         total: totalTurns,
-        message: 'میکس نهایی گفتار، موسیقی زمینه و افکت‌های صوتی...',
+        percent: 74,
+        message: 'گفتارها آماده شدند؛ در حال میکس موسیقی و افکت‌ها...',
       });
 
       // Mix voices + BGM + SFX into Master AudioBuffer
@@ -353,6 +372,7 @@ export default function App() {
         speedMultiplier: playbackRate,
       });
 
+      setSynthesizingProgress({ current: totalTurns, total: totalTurns, percent: 84, message: 'میکس انجام شد؛ در حال ساخت فایل MP3...' });
       setMasterAudioBuffer(masterBuf);
       setDuration(masterBuf.duration);
       setCurrentTime(0);
@@ -360,13 +380,16 @@ export default function App() {
       // Encode MP3 and WAV blobs for download and sharing
       const mp3 = encodeAudioBufferToMp3(masterBuf, 192);
       const wav = encodeAudioBufferToWav(masterBuf);
+      setSynthesizingProgress({ current: totalTurns, total: totalTurns, percent: 96, message: 'فایل‌ها آماده شدند؛ در حال ذخیره پروژه...' });
       setMp3Blob(mp3);
       setWavBlob(wav);
 
       // Auto save episode with duration
-      const updatedEpisode = { ...currentEpisode, durationSeconds: masterBuf.duration };
+      const updatedEpisode = { ...workingEpisode, durationSeconds: masterBuf.duration, projectStatus: 'completed' as const };
       setCurrentEpisode(updatedEpisode);
-      saveEpisodeToStorage(updatedEpisode);
+      await saveProject(updatedEpisode);
+      setSavedEpisodes((previous) => [updatedEpisode, ...previous.filter((item) => item.id !== updatedEpisode.id)]);
+      setSynthesizingProgress({ current: totalTurns, total: totalTurns, percent: 100, message: 'پروژه و فایل‌های خروجی ذخیره شدند.' });
 
       // Trigger Confetti Celebration!
       confetti({
@@ -383,7 +406,10 @@ export default function App() {
       startAudioPlayback(masterBuf, 0, playbackRate);
     } catch (err: any) {
       console.error('Synthesize & Mix error:', err);
-      alert('خطا در میکس پادکست: ' + (err.message || 'لطفاً دوباره تلاش کنید.'));
+      await saveProject(workingEpisode).catch((saveError) => console.error('Partial project save failed:', saveError));
+      setCurrentEpisode(workingEpisode);
+      setSynthesizingProgress((previous) => ({ ...previous, message: `کار متوقف شد؛ بخش‌های تکمیل‌شده ذخیره شدند. ${err.message || ''}` }));
+      alert('عملیات متوقف شد؛ بخش‌های تکمیل‌شده ذخیره شدند و می‌توانید بعداً ادامه دهید.\n' + (err.message || ''));
     } finally {
       setIsSynthesizingAudio(false);
     }
@@ -449,6 +475,10 @@ export default function App() {
   };
 
   const stopAudioPlayback = () => {
+    if (bgmPreviewSourceRef.current) {
+      try { bgmPreviewSourceRef.current.stop(); } catch (error) {}
+      bgmPreviewSourceRef.current = null;
+    }
     if (audioSourceRef.current) {
       try {
         audioSourceRef.current.stop();
@@ -461,6 +491,25 @@ export default function App() {
       animFrameRef.current = null;
     }
     setIsPlaying(false);
+  };
+
+  const handlePreviewBgm = (style: BgmStyle) => {
+    const ctx = getAudioContext();
+    if (bgmPreviewSourceRef.current) {
+      try { bgmPreviewSourceRef.current.stop(); } catch (error) {}
+      bgmPreviewSourceRef.current = null;
+      return;
+    }
+    if (style === 'none') { showToast('برای این گزینه موسیقی پخش نمی‌شود.'); return; }
+    const preview = createSyntheticBgmBuffer(ctx, style, 18);
+    const source = ctx.createBufferSource();
+    source.buffer = preview;
+    source.loop = true;
+    source.connect(ctx.destination);
+    source.onended = () => { if (bgmPreviewSourceRef.current === source) bgmPreviewSourceRef.current = null; };
+    bgmPreviewSourceRef.current = source;
+    source.start();
+    showToast('پیش‌شنوی آفلاین موسیقی در حال پخش است؛ برای توقف دوباره بزنید.');
   };
 
   const handleTogglePlay = () => {
@@ -529,10 +578,12 @@ export default function App() {
             savedEpisodes={savedEpisodes}
             onSelectEpisode={(ep) => {
               setCurrentEpisode(ep);
-              setStudioStep('player');
+              setStudioStep('editor');
               setCurrentTab('studio');
-              // Automatically re-synthesize or load
-              handleSynthesizeAndPlay();
+              setMasterAudioBuffer(null);
+              setMp3Blob(null);
+              setWavBlob(null);
+              setSynthesizingProgress({ current: 0, total: ep.script.length, percent: 0, message: 'پروژه بازیابی شد؛ برای ادامه، تولید صوت را انتخاب کنید.' });
             }}
             onDeleteEpisode={handleDeleteSavedEpisode}
             onNewPodcast={() => {
@@ -546,6 +597,7 @@ export default function App() {
               <InputStep
                 onGenerate={handleGenerateScript}
                 isGenerating={isGeneratingScript}
+                scriptProgress={scriptProgress}
                 onOpenApiModal={() => setIsApiModalOpen(true)}
                 provider={aiProvider}
                 externalProviderName={externalConfig.name || 'سرویس خارجی'}
@@ -563,6 +615,7 @@ export default function App() {
                 onPreviewTurn={handlePreviewTurn}
                 previewingTurnId={previewingTurnId}
                 onOpenCoverModal={() => setIsCoverModalOpen(true)}
+                onPreviewBgm={handlePreviewBgm}
               />
             )}
 
