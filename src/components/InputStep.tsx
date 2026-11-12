@@ -34,6 +34,7 @@ interface InputStepProps {
     dynamicToneEnabled: boolean;
   }) => void;
   isGenerating: boolean;
+  scriptProgress: { percent: number; message: string };
   onOpenApiModal: () => void;
   provider: AiProviderType;
   externalProviderName: string;
@@ -42,6 +43,7 @@ interface InputStepProps {
 export const InputStep: React.FC<InputStepProps> = ({
   onGenerate,
   isGenerating,
+  scriptProgress,
   onOpenApiModal,
   provider,
   externalProviderName,
@@ -473,6 +475,18 @@ export const InputStep: React.FC<InputStepProps> = ({
           <span className="text-xs text-slate-400">
             پس از ساخت سناریو، می‌توانید تک‌تک دیالوگ‌ها را ویرایش و با موسیقی ترکیب کنید.
           </span>
+          {isGenerating && (
+            <div className="w-full max-w-xl space-y-2 rounded-xl border border-purple-500/20 bg-slate-950/60 p-4">
+              <div className="flex items-center justify-between gap-3 text-xs text-slate-300">
+                <span>{scriptProgress.message || 'در حال ارتباط با مدل و تولید سناریو...'}</span>
+                <span className="font-bold tabular-nums">{scriptProgress.percent.toLocaleString('fa-IR')}٪</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500" style={{ width: `${scriptProgress.percent}%` }} />
+              </div>
+              <p className="text-[10px] text-slate-500">درصد، مراحل درخواست و دریافت پاسخ را نشان می‌دهد؛ سرویس مدل درصد دقیق تولید توکن را ارائه نمی‌کند.</p>
+            </div>
+          )}
         </div>
       </form>
     </div>
