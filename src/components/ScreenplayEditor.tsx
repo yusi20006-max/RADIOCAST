@@ -25,7 +25,7 @@ interface ScreenplayEditorProps {
   onUpdateEpisode: (updated: PodcastEpisode) => void;
   onSynthesizeAndPlay: () => void;
   isSynthesizing: boolean;
-  synthesizingProgress: { current: number; total: number; message: string };
+  synthesizingProgress: { current: number; total: number; percent: number; message: string };
   onBackToInput: () => void;
   onPreviewTurn: (turn: DialogueTurn) => void;
   previewingTurnId: string | null;
