@@ -4,6 +4,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
+import { isProviderUrlError, providerPostJson } from './server/providerUrlGuard.ts';
 
 dotenv.config();
 
@@ -37,11 +38,10 @@ app.post('/api/external-provider/health-check', async (req, res) => {
       return res.status(400).json({ healthy: false, error: 'کلید API (API Key) وارد نشده است.' });
     }
 
-    const cleanBaseUrl = baseUrl.trim().replace(/\/+$/, '');
-
-    // Test with a lightweight ping to /chat/completions
-    const response = await fetch(`${cleanBaseUrl}/chat/completions`, {
-      method: 'POST',
+    // Test with a lightweight ping to /chat/completions.
+    // The target URL is user-controlled, so the request goes through the SSRF guard
+    // (https only, public IPs only, no redirects, capped size/time).
+    const response = await providerPostJson(baseUrl, '/chat/completions', {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey.trim()}`,
@@ -51,13 +51,13 @@ app.post('/api/external-provider/health-check', async (req, res) => {
         messages: [{ role: 'user', content: 'ping' }],
         max_tokens: 5,
       }),
-      signal: AbortSignal.timeout(12000),
+      timeoutMs: 12000,
+      maxResponseBytes: 256 * 1024,
     });
 
     const latencyMs = Date.now() - startTime;
 
     if (!response.ok) {
-      const errBody = await response.text().catch(() => '');
       let errorMsg = `خطای سرویس (${response.status}): کلید یا آدرس نامعتبر است.`;
       if (response.status === 401) {
         errorMsg = 'کلید API ارائه‌شده نامعتبر یا منقضی شده است (401 Unauthorized).';
@@ -70,11 +70,15 @@ app.post('/api/external-provider/health-check', async (req, res) => {
         healthy: false,
         latencyMs,
         error: errorMsg,
-        details: errBody.slice(0, 200),
       });
     }
 
-    const data: any = await response.json().catch(() => ({}));
+    let data: any = {};
+    try {
+      data = JSON.parse(response.text);
+    } catch {
+      data = {};
+    }
     return res.json({
       healthy: true,
       latencyMs,
@@ -83,6 +87,9 @@ app.post('/api/external-provider/health-check', async (req, res) => {
     });
   } catch (error: any) {
     const latencyMs = Date.now() - startTime;
+    if (isProviderUrlError(error)) {
+      return res.status(400).json({ healthy: false, latencyMs, error: error.message });
+    }
     return res.json({
       healthy: false,
       latencyMs,
@@ -179,11 +186,9 @@ ${sourceText.slice(0, 8000)}
     // Check if user requested an external provider (OpenAI, OpenRouter, Groq, etc.)
     if (aiProvider === 'external' && externalConfig?.apiKey && externalConfig?.baseUrl) {
       try {
-        const cleanBaseUrl = externalConfig.baseUrl.trim().replace(/\/+$/, '');
         const systemInstruction = 'You are an award-winning Persian podcast director and audio scriptwriter. Output strictly valid JSON matching the podcast screenplay schema with fields: title, episodeSummary, genre, suggestedBgm, tags, chapters, script.';
 
-        const extResponse = await fetch(`${cleanBaseUrl}/chat/completions`, {
-          method: 'POST',
+        const extResponse = await providerPostJson(externalConfig.baseUrl, '/chat/completions', {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${externalConfig.apiKey.trim()}`,
@@ -197,11 +202,12 @@ ${sourceText.slice(0, 8000)}
             response_format: { type: 'json_object' },
             temperature: 0.7,
           }),
-          signal: AbortSignal.timeout(60000),
+          timeoutMs: 60000,
+          maxResponseBytes: 2 * 1024 * 1024,
         });
 
         if (extResponse.ok) {
-          const extData: any = await extResponse.json();
+          const extData: any = JSON.parse(extResponse.text);
           const rawContent = extData.choices?.[0]?.message?.content;
           if (rawContent) {
             const cleanJson = rawContent.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
@@ -214,6 +220,10 @@ ${sourceText.slice(0, 8000)}
         }
         console.warn('External provider responded with error, falling back to Google AI Studio Gemini...');
       } catch (extError) {
+        if (isProviderUrlError(extError)) {
+          // A rejected provider URL is a client error, not a reason to silently use the server's Gemini key.
+          return res.status(400).json({ error: (extError as Error).message });
+        }
         console.warn('External API call failed, safely falling back to Google AI Studio Gemini:', extError);
       }
     }
