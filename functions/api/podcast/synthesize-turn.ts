@@ -14,7 +14,7 @@ function pcmToWavBase64(base64: string, mimeType: string): string {
   const pcm = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) pcm[i] = binary.charCodeAt(i);
   // L16 is big-endian; WAV PCM samples are little-endian.
-  if (/audio\\/l16/i.test(mimeType)) {
+  if (/audio\/l16/i.test(mimeType)) {
     for (let i = 0; i + 1 < pcm.length; i += 2) { const byte = pcm[i]; pcm[i] = pcm[i + 1]; pcm[i + 1] = byte; }
   }
   const rateMatch = mimeType.match(/rate=(\d+)/i);
