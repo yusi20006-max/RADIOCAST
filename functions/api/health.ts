@@ -1,4 +1,4 @@
-import { json, type Env } from "../_shared";
+import { json, type PagesHandler } from "../_shared";
 
-export const onRequestGet: PagesFunction<Env> = async () =>
+export const onRequestGet: PagesHandler = async () =>
   json({ status: "ok", runtime: "cloudflare-pages" });
