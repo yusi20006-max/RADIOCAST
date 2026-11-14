@@ -70,3 +70,7 @@ KV برای نگهداری متادیتا و فهرست اپیزودها منا�
 - Binding: `PODCAST_KV`
 - شاخه Production موقت: `feat/cloudflare-pages-functions` تا پس از Merge شدن PR شماره ۵ به `main` تغییر کند.
 - Secret موردنیاز: `GEMINI_API_KEY` (مقدار آن باید توسط مالک حساب در Cloudflare تنظیم شود؛ مقدار Secretهای موجود قابل بازیابی از API نیست).
+
+
+## Cloudflare build runner
+در تنظیمات پروژه، نصب خودکار dependency غیرفعال شده است تا Cloudflare از Bun lockfile استفاده نکند؛ متغیر build با نام `SKIP_DEPENDENCY_INSTALL=1` تنظیم شده و فرمان build برابر `npm ci && npm run build` است.
