@@ -1,4 +1,4 @@
-import { errorMessage, extractGeminiText, geminiGenerate, json, readJson, requireGeminiKey, type Env, type PagesHandler } from "../../_shared";
+import { errorMessage, extractGeminiText, geminiGenerate, json, readJson, requireGeminiKey, type PagesHandler } from "../../_shared";
 
 export const onRequestPost: PagesHandler = async ({ request, env }) => {
   try {
