@@ -1,4 +1,4 @@
-import { json, readJson, type Env, type PagesHandler } from "../../_shared";
+import { json, readJson, type PagesHandler } from "../../_shared";
 
 const FEED_KEY = "radiocast:podcast-feed:v1";
 
