@@ -1,0 +1,11 @@
+name = "radiocast"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-11-01"
+
+# KV اختیاری است. برای فعال‌سازی:
+# 1) یک Namespace با نام R ADIOCAST_PODCAST_FEED بسازید.
+# 2) این بخش را از حالت کامنت خارج و id واقعی را جایگزین کنید.
+#
+# [[kv_namespaces]]
+# binding = "PODCAST_KV"
+# id = "YOUR_KV_NAMESPACE_ID"
