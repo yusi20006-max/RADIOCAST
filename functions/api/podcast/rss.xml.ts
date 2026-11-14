@@ -1,8 +1,8 @@
-import { buildRssXml, type Env } from "../../_shared";
+import { buildRssXml, type PagesHandler } from "../../_shared";
 
 const FEED_KEY = "radiocast:podcast-feed:v1";
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesHandler = async ({ env }) => {
   let channel: any = {
     title: "رادیوکست | پادکست‌های هوش مصنوعی",
     description: "پادکست‌های فارسی تولیدشده با استودیوی رادیوکست.",
