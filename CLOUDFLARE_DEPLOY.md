@@ -61,3 +61,12 @@ npm run dev:pages
 
 ## نکته مهم درباره فایل صوتی RSS
 KV برای نگهداری متادیتا و فهرست اپیزودها مناسب است، نه فایل‌های صوتی حجیم. برای فید قابل انتشار در پادگیرها، فایل MP3 هر اپیزود باید URL عمومی HTTPS داشته باشد (مثلاً Cloudflare R2 با دامنه عمومی). XML فقط زمانی تگ `enclosure` را اضافه می‌کند که یکی از فیلدهای `audioUrl`، `mp3Url` یا `audioFileUrl` دارای URL عمومی HTTPS باشد. آدرس‌های محلی `blob:` مرورگر در RSS معتبر نیستند.
+
+
+## وضعیت اتصال حساب Cloudflare
+- Pages project: `radiocast`
+- Pages URL: https://radiocast-8l5.pages.dev
+- KV namespace: `radiocast-podcast-feed`
+- Binding: `PODCAST_KV`
+- شاخه Production موقت: `feat/cloudflare-pages-functions` تا پس از Merge شدن PR شماره ۵ به `main` تغییر کند.
+- Secret موردنیاز: `GEMINI_API_KEY` (مقدار آن باید توسط مالک حساب در Cloudflare تنظیم شود؛ مقدار Secretهای موجود قابل بازیابی از API نیست).
