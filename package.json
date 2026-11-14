@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "npx wrangler pages dev dist",
+    "start": "npm run build && npx wrangler pages dev dist",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "server": "npx wrangler pages dev dist",
+    "server": "npm run build && npx wrangler pages dev dist",
     "dev:pages": "npm run build && npx wrangler pages dev dist"
   },
   "dependencies": {
