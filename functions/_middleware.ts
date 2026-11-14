@@ -1,6 +1,6 @@
-import type { Env } from "./_shared";
+import type { PagesHandler } from "./_shared";
 
-export const onRequest: PagesFunction<Env> = async ({ request, next }) => {
+export const onRequest: PagesHandler = async ({ request, next }) => {
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/api/")) return next();
 
