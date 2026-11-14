@@ -1,4 +1,4 @@
-import { errorMessage, json, normalizeOpenAiEndpoint, readJson, type Env, type PagesHandler } from "../../_shared";
+import { errorMessage, json, normalizeOpenAiEndpoint, readJson, type PagesHandler } from "../../_shared";
 
 export const onRequestPost: PagesHandler = async ({ request }) => {
   const startedAt = Date.now();
