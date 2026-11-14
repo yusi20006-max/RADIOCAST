@@ -7,7 +7,7 @@
 4. شاخه انتشار را `main` انتخاب کنید. تا زمان Merge شدن PR شماره ۵، شاخه قابلیت‌های جدید در Production نیست.
 5. نام پروژه را `radiocast` بگذارید و شاخه Production را `main` انتخاب کنید. تنظیمات Build را چنین وارد کنید:
    - Framework preset: **Vite**
-   - Build command: `npm run build`
+   - Build command: `npm run build` (Cloudflare dependency install is automatic via `package-lock.json`; avoid running `npm ci` twice)
    - Build output directory: `dist`
    - Root directory: `/`
 6. اولین Deployment را اجرا کنید. Pages فایل‌های پوشه `functions/` را به‌عنوان Pages Functions شناسایی می‌کند.
