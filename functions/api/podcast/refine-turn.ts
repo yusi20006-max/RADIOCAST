@@ -1,6 +1,6 @@
-import { errorMessage, extractGeminiText, geminiGenerate, json, readJson, requireGeminiKey, type Env } from "../../_shared";
+import { errorMessage, extractGeminiText, geminiGenerate, json, readJson, requireGeminiKey, type Env, type PagesHandler } from "../../_shared";
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesHandler = async ({ request, env }) => {
   try {
     const input = await readJson(request);
     const currentText = typeof input.currentText === "string" ? input.currentText.trim() : "";
