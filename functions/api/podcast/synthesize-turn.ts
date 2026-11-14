@@ -1,4 +1,4 @@
-import { errorMessage, geminiGenerate, json, readJson, requireGeminiKey, type Env } from "../../_shared";
+import { errorMessage, geminiGenerate, json, readJson, requireGeminiKey, type Env, type PagesHandler } from "../../_shared";
 
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -13,6 +13,10 @@ function pcmToWavBase64(base64: string, mimeType: string): string {
   const binary = atob(base64);
   const pcm = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) pcm[i] = binary.charCodeAt(i);
+  // L16 is big-endian; WAV PCM samples are little-endian.
+  if (/audio\\/l16/i.test(mimeType)) {
+    for (let i = 0; i + 1 < pcm.length; i += 2) { const byte = pcm[i]; pcm[i] = pcm[i + 1]; pcm[i + 1] = byte; }
+  }
   const rateMatch = mimeType.match(/rate=(\d+)/i);
   const sampleRate = rateMatch ? Number(rateMatch[1]) : 24000;
   const channels = 1;
@@ -40,7 +44,7 @@ function pcmToWavBase64(base64: string, mimeType: string): string {
   return toBase64(wav);
 }
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesHandler = async ({ request, env }) => {
   try {
     const input = await readJson(request);
     const text = typeof input.text === "string" ? input.text.trim() : "";
