@@ -1,6 +1,11 @@
+export interface KvBinding {
+  get(key: string, type: "json"): Promise<unknown>;
+  put(key: string, value: string): Promise<void>;
+}
+
 export interface Env {
   GEMINI_API_KEY?: string;
-  PODCAST_KV?: KVNamespace;
+  PODCAST_KV?: KvBinding;
 }
 
 export interface PagesContext {
@@ -11,6 +16,8 @@ export interface PagesContext {
   next(): Promise<Response>;
   data: Record<string, unknown>;
 }
+
+export type PagesHandler = (context: PagesContext) => Response | Promise<Response>;
 
 export type JsonRecord = Record<string, unknown>;
 
