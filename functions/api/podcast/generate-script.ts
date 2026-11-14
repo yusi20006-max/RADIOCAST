@@ -1,6 +1,6 @@
 import {
   errorMessage, extractGeminiText, geminiGenerate, json, openAiChat,
-  parseModelJson, readJson, requireGeminiKey, type Env,
+  parseModelJson, readJson, requireGeminiKey, type Env, type PagesHandler,
 } from "../../_shared";
 
 const MODEL = "gemini-2.5-flash";
@@ -51,7 +51,7 @@ ${String(input.sourceText || "").slice(0, 50000)}
 - تعداد دیالوگ‌ها متناسب با مدت هدف باشد و متن منبع را بدون جعل واقعیت بسط دهید.`;
 }
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesHandler = async ({ request, env }) => {
   try {
     const input = await readJson(request);
     if (typeof input.sourceText !== "string" || !input.sourceText.trim()) {
