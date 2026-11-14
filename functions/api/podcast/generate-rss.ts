@@ -1,6 +1,6 @@
-import { buildRssXml, json, readJson, type Env } from "../../_shared";
+import { buildRssXml, json, readJson, type PagesHandler } from "../../_shared";
 
-export const onRequestPost: PagesFunction<Env> = async ({ request }) => {
+export const onRequestPost: PagesHandler = async ({ request }) => {
   try {
     const input = await readJson(request);
     return json({ xml: buildRssXml(input.channel, Array.isArray(input.episodes) ? input.episodes : []) });
