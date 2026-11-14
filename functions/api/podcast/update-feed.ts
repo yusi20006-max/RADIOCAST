@@ -1,8 +1,8 @@
-import { json, readJson, type Env } from "../../_shared";
+import { json, readJson, type Env, type PagesHandler } from "../../_shared";
 
 const FEED_KEY = "radiocast:podcast-feed:v1";
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesHandler = async ({ request, env }) => {
   try {
     const input = await readJson(request);
     const payload = {
