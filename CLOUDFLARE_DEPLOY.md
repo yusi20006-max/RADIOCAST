@@ -1,5 +1,20 @@
 # استقرار RadioCast روی Cloudflare Pages
 
+## نصب ابزارهای توسعه
+برای تایپ‌های Cloudflare و اجرای محلی Pages:
+
+```bash
+npm install -D @cloudflare/workers-types wrangler
+```
+
+کد Functions از Web API و تایپ‌های ساختاری Pages استفاده می‌کند؛ نصب بسته بالا ابزارهای رسمی تایپ و Wrangler را برای توسعه و بررسی دقیق‌تر فراهم می‌کند.
+
+اجرای محلی با Pages Functions (نه Express قدیمی):
+
+```bash
+npm run dev:pages
+```
+
 ## Build settings
 - Framework preset: Vite
 - Build command: `npm run build`
