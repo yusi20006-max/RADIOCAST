@@ -2,10 +2,10 @@
 
 ## ساخت پروژه Pages از طریق داشبورد
 1. در Cloudflare Dashboard وارد **Workers & Pages** شوید.
-2. گزینه **Create application → Pages → Connect to Git** را انتخاب کنید.
+2. گزینه **Create application → Pages → Import an existing Git repository** را انتخاب کنید.
 3. مخزن GitHub با نام `yusi20006-max/RADIOCAST` را متصل کنید.
 4. شاخه انتشار را `main` انتخاب کنید. تا زمان Merge شدن PR شماره ۵، شاخه قابلیت‌های جدید در Production نیست.
-5. تنظیمات Build را چنین وارد کنید:
+5. نام پروژه را `radiocast` بگذارید و شاخه Production را `main` انتخاب کنید. تنظیمات Build را چنین وارد کنید:
    - Framework preset: **Vite**
    - Build command: `npm run build`
    - Build output directory: `dist`
@@ -43,7 +43,7 @@ npm run dev:pages
 2. Namespace جدیدی با نام `radiocast-podcast-feed` بسازید.
 3. شناسه Namespace را کپی کنید.
 4. بلوک `[[kv_namespaces]]` را در `wrangler.toml` از حالت کامنت خارج کنید و مقدار `id` را با شناسه واقعی جایگزین کنید.
-5. در Pages Project به **Settings → Functions → KV namespace bindings** بروید.
+5. در Pages Project به **Settings → Bindings → Add → KV namespace** بروید.
 6. Binding با نام `PODCAST_KV` را به همان Namespace متصل کنید؛ برای Preview نیز در صورت نیاز Binding جداگانه تنظیم کنید.
 7. Deployment جدید اجرا کنید.
 
