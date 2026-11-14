@@ -1,5 +1,17 @@
 # استقرار RadioCast روی Cloudflare Pages
 
+## ساخت پروژه Pages از طریق داشبورد
+1. در Cloudflare Dashboard وارد **Workers & Pages** شوید.
+2. گزینه **Create application → Pages → Connect to Git** را انتخاب کنید.
+3. مخزن GitHub با نام `yusi20006-max/RADIOCAST` را متصل کنید.
+4. شاخه انتشار را `main` انتخاب کنید. تا زمان Merge شدن PR شماره ۵، شاخه قابلیت‌های جدید در Production نیست.
+5. تنظیمات Build را چنین وارد کنید:
+   - Framework preset: **Vite**
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+   - Root directory: `/`
+6. اولین Deployment را اجرا کنید. Pages فایل‌های پوشه `functions/` را به‌عنوان Pages Functions شناسایی می‌کند.
+
 ## نصب ابزارهای توسعه
 برای تایپ‌های Cloudflare و اجرای محلی Pages:
 
@@ -14,12 +26,6 @@ npm install -D @cloudflare/workers-types wrangler
 ```bash
 npm run dev:pages
 ```
-
-## Build settings
-- Framework preset: Vite
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Root directory: `/`
 
 ## متغیر محرمانه Gemini
 1. در Cloudflare Dashboard وارد **Workers & Pages** شوید.
