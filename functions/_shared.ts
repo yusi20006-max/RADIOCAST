@@ -32,7 +32,7 @@ export function errorMessage(error: unknown, fallback = "خطای غیرمنتظ
   return error instanceof Error ? error.message : fallback;
 }
 
-export async function readJson<T extends JsonRecord = JsonRecord>(request: Request): Promise<T> {
+export async function readJson<T = any>(request: Request): Promise<T> {
   const contentType = request.headers.get("content-type") || "";
   if (!contentType.toLowerCase().includes("application/json")) {
     throw new Error("درخواست باید با Content-Type: application/json ارسال شود.");
