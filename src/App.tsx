@@ -528,7 +528,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white" dir="rtl">
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white" dir="rtl">
       {/* Studio Header */}
       <Header
         currentTab={currentTab}
@@ -544,7 +544,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="flex-1 w-full min-w-0 overflow-x-clip px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {currentTab === 'library' ? (
           <LibraryView
             savedEpisodes={savedEpisodes}
@@ -670,7 +670,7 @@ export default function App() {
 
       {/* Feedback Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-purple-600/90 text-white text-xs sm:text-sm font-bold shadow-2xl backdrop-blur-md border border-purple-400/40 animate-bounce">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-2rem)] text-center px-5 py-2.5 rounded-2xl bg-purple-600/90 text-white text-xs sm:text-sm font-bold shadow-2xl backdrop-blur-md border border-purple-400/40 animate-bounce">
           {toastMessage}
         </div>
       )}

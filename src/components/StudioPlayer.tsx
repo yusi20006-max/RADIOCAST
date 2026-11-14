@@ -147,7 +147,7 @@ export const StudioPlayer: React.FC<StudioPlayerProps> = ({
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-28">
       {/* Top action row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={onBackToEditor}
           className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl transition-all"

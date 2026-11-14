@@ -159,7 +159,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-20">
       {/* Back button and Episode Header Card */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={onBackToInput}
           className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl transition-all"
@@ -168,7 +168,7 @@ export const ScreenplayEditor: React.FC<ScreenplayEditorProps> = ({
           <span>بازگشت به متن اولیه</span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 font-medium">
             تعداد دیالوگ‌ها: {episode.script.length.toLocaleString('fa-IR')}
           </span>
