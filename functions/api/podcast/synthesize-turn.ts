@@ -1,4 +1,4 @@
-import { errorMessage, geminiGenerate, json, readJson, requireGeminiKey, type Env, type PagesHandler } from "../../_shared";
+import { geminiErrorResponse, geminiGenerate, json, readJson, requireGeminiKey, type Env, type PagesHandler } from "../../_shared";
 
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -72,6 +72,6 @@ export const onRequestPost: PagesHandler = async ({ request, env }) => {
       mimeType: isPcm ? "audio/wav" : rawMime,
     });
   } catch (error) {
-    return json({ error: errorMessage(error, "خطا در تولید صدای دیالوگ.") }, 500);
+    return geminiErrorResponse(error, "خطا در تولید صدای دیالوگ.");
   }
 };
