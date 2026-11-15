@@ -1,5 +1,5 @@
 import {
-  errorMessage, extractGeminiText, geminiGenerate, json, openAiChat,
+  errorMessage, extractGeminiText, geminiErrorResponse, geminiGenerate, json, openAiChat,
   parseModelJson, readJson, requireGeminiKey, type Env, type PagesHandler,
 } from "../../_shared";
 
@@ -109,6 +109,6 @@ export const onRequestPost: PagesHandler = async ({ request, env }) => {
       script: parsed.script,
     });
   } catch (error) {
-    return json({ error: errorMessage(error, "خطا در تولید سناریو.") }, 500);
+    return geminiErrorResponse(error, "خطا در تولید سناریو.");
   }
 };
