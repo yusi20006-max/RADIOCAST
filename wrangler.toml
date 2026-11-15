@@ -1,0 +1,7 @@
+name = "radiocast"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-11-01"
+
+[[kv_namespaces]]
+binding = "PODCAST_KV"
+id = "8c16ca25ef994cfb864d8ef43028305e"
