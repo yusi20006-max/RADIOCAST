@@ -3,7 +3,7 @@ import {
   parseModelJson, readJson, requireGeminiKey, type Env, type PagesHandler,
 } from "../../_shared";
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-3.8-flash";
 const allowedTones = "curious | excited | reflective | friendly | serious | humorous | dramatic";
 
 function makePrompt(input: any): string {
@@ -79,7 +79,7 @@ export const onRequestPost: PagesHandler = async ({ request, env }) => {
       const apiKey = requireGeminiKey(env);
       const result = await geminiGenerate(apiKey, MODEL, {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+        generationConfig: { responseMimeType: "application/json" },
       });
       parsed = parseModelJson<any>(extractGeminiText(result));
     }
