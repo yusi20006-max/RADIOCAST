@@ -49,6 +49,24 @@ export function requireGeminiKey(env: Env): string {
   return env.GEMINI_API_KEY;
 }
 
+export class GeminiApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly retryable: boolean,
+  ) {
+    super(message);
+    this.name = "GeminiApiError";
+  }
+}
+
+const RETRYABLE_GEMINI_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+function isRetryableGeminiFailure(status: number, message: string): boolean {
+  return RETRYABLE_GEMINI_STATUSES.has(status)
+    || /high demand|overloaded|temporarily unavailable|try again later|resource exhausted/i.test(message);
+}
+
 export async function geminiGenerate(
   apiKey: string,
   model: string,
@@ -56,17 +74,57 @@ export async function geminiGenerate(
 ): Promise<any> {
   const url = new URL(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`);
   url.searchParams.set("key", apiKey);
-  const response = await fetch(url.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) {
+
+  const maxAttempts = 3;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(url.toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      const message = errorMessage(error, "ارتباط با سرویس Gemini برقرار نشد.");
+      if (attempt < maxAttempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+        continue;
+      }
+      throw new GeminiApiError(message, 503, true);
+    }
+
+    const result = await response.json().catch(() => ({}));
+    if (response.ok) return result;
+
     const message = (result as any)?.error?.message || `Gemini API پاسخ ${response.status} برگرداند.`;
-    throw new Error(message);
+    const retryable = isRetryableGeminiFailure(response.status, message);
+    if (retryable && attempt < maxAttempts - 1) {
+      const retryAfter = Number(response.headers.get("Retry-After"));
+      const delay = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 2500)
+        : 700 * (attempt + 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      continue;
+    }
+    throw new GeminiApiError(message, response.status, retryable);
   }
-  return result;
+
+  throw new GeminiApiError("سرویس Gemini موقتاً در دسترس نیست.", 503, true);
+}
+
+export function geminiErrorResponse(error: unknown, fallback: string): Response {
+  if (error instanceof GeminiApiError && error.retryable) {
+    const status = error.status === 429 ? 429 : 503;
+    return json({
+      error: status === 429
+        ? "محدودیت موقت درخواست به سرویس هوش مصنوعی اعمال شده است. کمی بعد دوباره تلاش کنید."
+        : "سرویس هوش مصنوعی در حال حاضر شلوغ است. لطفاً چند لحظه بعد دوباره تلاش کنید.",
+      code: "GEMINI_TEMPORARY_UNAVAILABLE",
+      retryable: true,
+      retryAfterSeconds: 20,
+    }, status);
+  }
+  return json({ error: errorMessage(error, fallback) }, 500);
 }
 
 export function extractGeminiText(result: any): string {
